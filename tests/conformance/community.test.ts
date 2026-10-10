@@ -11,7 +11,7 @@ import {
   openAICompatibleModels,
   resolveOpenAICompatible,
 } from "../../src/substrate/engines/openai-compatible.ts";
-import { extraUngrantableDirs, grantableToolDirs } from "../../src/substrate/windows-sandbox.ts";
+import { extraUngrantableDirs, grantableToolDirs, keepWindowsDenies } from "../../src/substrate/windows-sandbox.ts";
 import { GOOD_KEY, startFakeOpenRouter, type FakeOpenRouter } from "../helpers/fake-openrouter.ts";
 import { tmpDir } from "../helpers/tmp.ts";
 
@@ -97,5 +97,12 @@ describe("Windows sandbox grants", () => {
       "C:\\Users\\David\\big",
       "D:\\tools",
     ]);
+  });
+  it("skips existing denies in the profile that no grant covers (browser User Data)", () => {
+    delete process.env.GENEX_SANDBOX_STAMP_ALL;
+    const chrome = "C:\\Users\\David\\AppData\\Local\\Google\\Chrome\\User Data";
+    const ssh = "C:\\Users\\David\\AI Games\\.ssh";
+    const kept = keepWindowsDenies([chrome, ssh], { roots: ["C:\\Users\\David\\AI Games"], profile }, () => true);
+    assert.deepEqual(kept, [ssh]);
   });
 });

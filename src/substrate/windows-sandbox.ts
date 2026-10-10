@@ -252,7 +252,12 @@ export function keepWindowsDenies(
 ): string[] {
   const unreadable = (p: string) =>
     insideWindowsPath(scope.profile, p) && !scope.roots.some((root) => insideWindowsPath(root, p));
-  const kept = paths.filter((p) => exists(p) || !unreadable(p));
+  // [genex-windows-community] A deny inside the profile that no grant covers is skipped even when
+  // it exists: the sandbox user has no rights there anyway, and stamping a browser's "User Data"
+  // (hundreds of thousands of files) recursively takes longer than any timeout.
+  // GENEX_SANDBOX_STAMP_ALL=1 restores upstream behaviour (stamp every existing path).
+  const stampAll = process.env.GENEX_SANDBOX_STAMP_ALL === "1";
+  const kept = paths.filter((p) => (stampAll && exists(p)) || !unreadable(p));
   return [...new Map(kept.map((p) => [pathKey(p), p])).values()];
 }
 

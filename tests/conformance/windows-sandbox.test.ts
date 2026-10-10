@@ -59,6 +59,9 @@ import {
 } from "../../src/substrate/windows-folder-ace.ts";
 import { tmpDir } from "../helpers/tmp.ts";
 
+// Upstream behaviour (stamp every existing deny); the community default is covered in community.test.ts.
+process.env.GENEX_SANDBOX_STAMP_ALL = "1";
+
 /** How long a test waits for a file removed in the background: polls of POLL_MS each. */
 const ENV_FILE_POLLS = 200;
 const POLL_MS = 10;
