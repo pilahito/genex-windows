@@ -132,7 +132,9 @@ describe("Juegos para móvil plugin", () => {
       }
       throw new Error(method);
     };
-    const backend = await import(path.join(root, "backend.mjs"));
+    const { pathToFileURL } = await import("node:url");
+    // A file URL: a bare Windows path (D:\...) is not an import specifier.
+    const backend = await import(pathToFileURL(path.join(root, "backend.mjs")).href);
     const plugin = await backend.activate();
     const ctx = { project: game, host };
     const before = await plugin.tool("status", {}, ctx);
