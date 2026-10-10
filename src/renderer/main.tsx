@@ -19,6 +19,7 @@ import { createRoot } from "react-dom/client";
 import { ErrorBoundary } from "./ErrorBoundary.tsx";
 import { initializeAppearance } from "./appearance/store.ts";
 import { installMotionRest } from "./motion-rest.ts";
+import { installTranslator } from "./i18n/translate.ts";
 import { BootRoot } from "./SandboxSetup.tsx";
 import { createBoot } from "./state/boot.ts";
 import { startStudio } from "./state/studio.ts";
@@ -27,6 +28,8 @@ import { MINUTE_MS } from "../shared/duration.ts";
 
 initializeAppearance();
 installMotionRest();
+// Genex Windows Community: Spanish interface by default (Settings › Appearance › Language).
+installTranslator();
 
 // React's development build (watch and owned development builds; scripts/renderer-build.mjs)
 // records a User Timing measure for every component render and never clears them; drop them so

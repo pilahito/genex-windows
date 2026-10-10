@@ -28,6 +28,7 @@ import {
   type ThemeSelection,
 } from "../appearance/themes.ts";
 import { useAppearance } from "../appearance/store.ts";
+import { Language, currentLanguage, setLanguage } from "../i18n/translate.ts";
 import { HomeBackdropSection } from "./HomeBackdropSection.tsx";
 import { Button } from "../ui/Button.tsx";
 import { Icon } from "../ui/icons.tsx";
@@ -625,6 +626,26 @@ function ModeOption({ mode, light, dark }: { mode: AppearanceMode; light: Palett
     </label>
   );
 }
+/** Genex Windows Community: Spanish (default) or the original English labels. */
+const LANGUAGE_OPTIONS = [
+  { value: Language.Spanish, label: "Español" },
+  { value: Language.English, label: "English" },
+];
+function LanguageSection() {
+  return (
+    <section className="appearance-typography" aria-label="Language">
+      <h3>Language</h3>
+      <SettingRow label="Idioma / Language">
+        <Choice
+          label="Idioma / Language"
+          value={currentLanguage()}
+          options={LANGUAGE_OPTIONS}
+          onChange={(language) => setLanguage(language === Language.English ? Language.English : Language.Spanish)}
+        />
+      </SettingRow>
+    </section>
+  );
+}
 function TypographySection() {
   const { appearance, update } = useAppearance();
   return (
@@ -681,6 +702,7 @@ export function AppearanceSection() {
       <HomeBackdropSection />
       <ThemeEditor scheme={Scheme.Light} />
       <ThemeEditor scheme={Scheme.Dark} />
+      <LanguageSection />
       <TypographySection />
       {error && (
         <p role="alert" className="appearance-error">
