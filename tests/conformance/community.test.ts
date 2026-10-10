@@ -26,6 +26,9 @@ describe("OpenAI-compatible presets", () => {
     assert.equal(resolveOpenAICompatible({}).local, true);
     assert.equal(resolveOpenAICompatible({ preset: "lmstudio" }).baseUrl, "http://127.0.0.1:1234/v1");
     assert.equal(resolveOpenAICompatible({ preset: "deepseek" }).local, false);
+    for (const preset of ["openrouter", "deepseek", "openai"])
+      assert.equal(new OpenAICompatibleEngine({ root: "/tmp/x", config: { preset } }).metered, true, preset);
+    assert.equal(new OpenAICompatibleEngine({ root: "/tmp/x", config: { preset: "jan" } }).metered, false);
     assert.equal(
       resolveOpenAICompatible({ preset: "custom", baseUrl: "http://localhost:9000/v1/" }).baseUrl,
       "http://localhost:9000/v1",

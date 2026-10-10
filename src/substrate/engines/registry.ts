@@ -60,7 +60,13 @@ export class EngineRegistry {
   async #readyInOrder(keep: (engine: Engine) => boolean): Promise<Engine[]> {
     const engines = this.#preferredOrder
       .map((id) => this.#engines.get(id))
-      .filter((engine): engine is Engine => Boolean(engine) && !isMetered(engine?.id) && keep(engine as Engine));
+      .filter(
+        (engine): engine is Engine =>
+          Boolean(engine) &&
+          !isMetered(engine?.id) &&
+          !(engine as { metered?: boolean }).metered &&
+          keep(engine as Engine),
+      );
     const ready = await Promise.all(engines.map((engine) => this.#readyWithin(engine)));
     return engines.filter((_, index) => ready[index]);
   }

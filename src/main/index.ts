@@ -701,7 +701,7 @@ function devWindowTitle(launch: NonNullable<typeof dev>): string {
 function windowTitle(): { title?: string } {
   if (dev) return { title: devWindowTitle(dev) };
   if (isSmoke) return { title: "Genex Smoke" };
-  return {};
+  return { title: COMMUNITY_PRODUCT_NAME };
 }
 
 /** A parked fixture window: unfocusable, off the taskbar and off every display. */

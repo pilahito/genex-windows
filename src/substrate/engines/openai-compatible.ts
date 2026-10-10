@@ -170,6 +170,8 @@ export class OpenAICompatibleEngine implements Engine {
   readonly sessions: LocalSessions;
   readonly baseUrl: string;
   readonly local: boolean;
+  /** A paid API (OpenRouter, DeepSeek, OpenAI, a remote URL): never picked automatically as a free fallback. */
+  readonly metered: boolean;
   readonly #config: Partial<OpenAICompatibleConfig>;
   readonly #catalog: ModelCatalog;
   readonly #now: () => number;
@@ -182,6 +184,7 @@ export class OpenAICompatibleEngine implements Engine {
     this.baseUrl = resolved.baseUrl;
     this.label = resolved.label;
     this.local = resolved.local;
+    this.metered = !resolved.local;
     this.#config = options.config;
     this.#now = options.now ?? Date.now;
     this.#timeoutMs = options.timeoutMs ?? COMPLETION_TIMEOUT_MS;
