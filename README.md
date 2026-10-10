@@ -52,9 +52,9 @@ iOS necesita un Mac con Xcode.
 
 ### El asistente de instalación
 
-| Información | Componentes (plugins opcionales) | Final |
+| Bienvenida | Componentes (plugins opcionales) | Final |
 | --- | --- | --- |
-| ![Información](docs/screenshots/instalador-01-informacion.png) | ![Componentes](docs/screenshots/instalador-02-componentes.png) | ![Final](docs/screenshots/instalador-03-final.png) |
+| ![Bienvenida](docs/screenshots/instalador-01-bienvenida.png) | ![Componentes](docs/screenshots/instalador-02-componentes.png) | ![Final](docs/screenshots/instalador-03-final.png) |
 
 ### Compilarlo tú mismo
 
