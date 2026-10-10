@@ -4,8 +4,8 @@
 >
 > No está hecho ni respaldado por los autores de Genex. Todo el mérito del programa original es suyo: ver [Créditos](#créditos).
 
-![Pantalla de inicio (Linux)](docs/screenshots/linux-01-start.png)
-*Captura real hecha en **Linux** (Xvfb). TODO: añadir capturas reales en Windows.*
+![Genex Windows Community en Windows 11](docs/screenshots/windows-01-start-sandbox-off.png)
+*Captura real en **Windows 11** (build de la Release v0.1.5-community.1, arrancado con `GENEX_SANDBOX=off`, por eso sale el aviso).*
 
 ## ¿Qué cambia respecto a la versión oficial?
 
@@ -96,6 +96,7 @@ Cambios de este fork:
 - **Tiempo de espera de ACL configurable**: 300 s por defecto (antes 60 s fijos). `GENEX_SANDBOX_ACL_TIMEOUT_MS` o `aclTimeoutMs`. Implementado como parche de `patch-package` en [`patches/`](patches/).
 - **No se dan permisos a carpetas gigantes** del `PATH`: `%LOCALAPPDATA%\pnpm`, `%APPDATA%\npm`, `%LOCALAPPDATA%\npm-cache`, `%LOCALAPPDATA%\Yarn`, `scoop\apps`, `.cargo\registry`. Puedes añadir más con `GENEX_SANDBOX_SKIP_DIRS` (separadas por `;`) o `sandboxSkipDirs`.
 - **Ventana de progreso** durante la preparación, en vez de quedarse "colgado" sin ventana.
+- **No abras la Genex oficial a la vez**: las dos usan el mismo sandbox (`%LOCALAPPDATA%\sandbox-runtime\.acl-init.lock`). Si una copia oficial está colgada preparando permisos, esta versión falla con `init lock ... not acquired within 60000ms`. Cierra todos los `genex.exe` antes de abrirla.
 - **Desactivar el sandbox**: `GENEX_SANDBOX=off` o `"sandbox": false`. ⚠️ Los agentes podrán leer y cambiar cualquier archivo de tu usuario. Úsalo solo si confías en el modelo y el proyecto.
 
 ### Kaspersky y otros antivirus
@@ -111,11 +112,19 @@ Windows Defender: *Seguridad de Windows → Protección contra virus y amenazas 
 
 ## Capturas
 
+**Windows 11** (capturas reales, arrancado con `GENEX_SANDBOX=off`):
+
+| | |
+|---|---|
+| ![Inicio en Windows](docs/screenshots/windows-01-start-sandbox-off.png) | ![Aviso de sandbox desactivado](docs/screenshots/windows-02-sandbox-off-warning.png) |
+
+**Linux** (capturas reales, Xvfb, sin sandbox):
+
 | | |
 |---|---|
 | ![Inicio](docs/screenshots/linux-01-start.png) | ![Bienvenida](docs/screenshots/linux-02-onboarding.png) |
 
-Capturas reales, tomadas en **Linux** (Xvfb, sin sandbox). **TODO:** capturas en Windows.
+TODO: capturas en Windows con el sandbox activado y con un juego creado con Jan.
 
 ## Desarrollo
 
@@ -145,4 +154,4 @@ Archivos propios del fork: `src/main/community.ts`, `src/substrate/engines/opena
 - **OpenAI-compatible provider** with presets for Jan, LM Studio, llama.cpp, vLLM, Ollama, OpenRouter, DeepSeek and OpenAI, configured in `%APPDATA%\Genex Windows Community\community.json` or `GENEX_OPENAI_*` env vars. Tool calling uses the standard OpenAI `tools`/`tool_calls` API.
 - **Rebranded** (own name, icon and data folder), auto-update disabled, MIT license and original copyright kept, NOTICE added.
 - **CI:** `.github/workflows/build-windows.yml` builds the Windows installer and portable zip, and attaches them to a release for `v*` tags.
-- Screenshots are real but taken on **Linux**; Windows screenshots are TODO.
+- Screenshots are real: Windows 11 (sandbox off) and Linux (Xvfb). Windows screenshots with the sandbox on are TODO.
