@@ -1461,12 +1461,16 @@ button.chat-header-title:hover {
   padding: 5px 0 14px 8px;
 }
 .sidebar-wordmark {
-  width: var(--logo-width, 80px);
+  /* Genex Windows Community: a two-line text wordmark, as wide as its own words. */
+  width: auto;
+  min-width: var(--logo-width, 80px);
+  max-width: 150px;
   height: auto;
 }
 /* The wordmark is the way home: a quiet button around it, its focus ring on the mark. */
 .sidebar-home {
   display: flex;
+  min-width: 0;
   border-radius: var(--radius-control);
   margin: -4px -6px;
   padding: 4px 6px;

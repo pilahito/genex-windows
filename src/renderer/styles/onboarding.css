@@ -68,7 +68,9 @@
   color: var(--ink-3);
 }
 .onboarding-wordmark {
-  width: 142px;
+  /* Genex Windows Community: the two-line text wordmark, sized by its type. */
+  width: auto;
+  font-size: 30px;
   height: auto;
 }
 .onboarding-fit {

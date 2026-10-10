@@ -118,12 +118,21 @@ async function buildBlender(root, resources, sdk) {
   });
 }
 
+/**
+ * Genex Windows Community: "Juegos para móvil" ships as written (a plain-JavaScript backend that
+ * reads its templates beside it), like the SDK example.
+ */
+async function buildMobile(root, resources) {
+  await cp(path.join(root, "src/plugins/mobile"), path.join(resources, "plugins/mobile"), { recursive: true });
+}
+
 /** Copies the SDK and builds the bundled plugins (and the example) into the app's resources. */
 export async function buildPlugins(root, resources, { dependencies = true } = {}) {
   await cp(path.join(root, "src/plugin-sdk"), path.join(resources, "plugin-sdk"), { recursive: true });
   await buildGenex(root, resources, { dependencies });
   const sdk = path.join(root, "src/plugin-sdk");
   await buildBlender(root, resources, sdk);
+  await buildMobile(root, resources);
   await mkdir(path.join(resources, "examples"), { recursive: true });
   await cp(path.join(root, "src/plugins/example"), path.join(resources, "examples/example"), { recursive: true });
   const examplePanel = path.join(resources, "examples/example/panel.html");
