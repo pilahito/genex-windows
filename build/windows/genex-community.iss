@@ -120,7 +120,10 @@ Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExe}"; AppUserModelID: "
 [Run]
 Filename: "{app}\{#AppExe}"; Description: "{cm:LaunchNow}"; Flags: nowait postinstall skipifsilent
 ; The in-app updater runs this installer with /SILENT /RELAUNCH=1: open Genex again when it ends.
+; /DNoRelaunchRun (test builds only) leaves out the relaunch after an update.
+#ifndef NoRelaunchRun
 Filename: "{app}\{#AppExe}"; Flags: nowait skipifnotsilent runasoriginaluser; Check: WantsRelaunch
+#endif
 
 [UninstallDelete]
 Type: files; Name: "{app}\{#PluginsRel}\community-plugins.json"
@@ -145,6 +148,55 @@ end;
 function WantsRelaunch(): Boolean;
 begin
   Result := ExpandConstant('{param:RELAUNCH|0}') = '1';
+end;
+
+function GetTickCount(): DWord; external 'GetTickCount@kernel32.dll stdcall';
+
+{ Processes whose executable lives under Dir (the app and its helpers such as srt-win.exe). }
+function CountAppProcesses(Dir: String): Integer;
+var
+  Locator, Wmi, Procs, Proc: Variant;
+  I: Integer;
+  ExePath: String;
+begin
+  Result := 0;
+  try
+    Locator := CreateOleObject('WbemScripting.SWbemLocator');
+    Wmi := Locator.ConnectServer('.', 'root\CIMV2');
+    Procs := Wmi.ExecQuery('SELECT ExecutablePath FROM Win32_Process WHERE ExecutablePath IS NOT NULL');
+    for I := 0 to Procs.Count - 1 do
+    begin
+      Proc := Procs.ItemIndex(I);
+      ExePath := Proc.ExecutablePath;
+      if Pos(Lowercase(Dir), Lowercase(ExePath)) = 1 then Result := Result + 1;
+    end;
+  except
+    Log('Could not list processes: ' + GetExceptionMessage);
+    Result := 0;
+  end;
+end;
+
+{ The in-app updater starts this installer (/RELAUNCH=1) and then quits, but the app needs some
+  seconds to stop the studio and its sandbox. Files still in use make a silent install roll back,
+  so on an update wait (up to three minutes) until nothing runs from the install folder. }
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+var
+  Dir: String;
+  Start, Elapsed: DWord;
+  Left: Integer;
+begin
+  Result := '';
+  if not WantsRelaunch() then exit;
+  Dir := AddBackslash(ExpandConstant('{app}'));
+  Start := GetTickCount();
+  Left := CountAppProcesses(Dir);
+  while (Left > 0) and (GetTickCount() - Start < 180000) do
+  begin
+    Sleep(500);
+    Left := CountAppProcesses(Dir);
+  end;
+  Elapsed := (GetTickCount() - Start) div 1000;
+  Log(Format('Update: waited %d s for the app to close (%d processes left).', [Integer(Elapsed), Left]));
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);

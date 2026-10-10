@@ -136,6 +136,16 @@ describe("Community updater (pilahito/genex-windows releases)", () => {
   });
 });
 
+describe("Installer started by the updater", () => {
+  it("waits on an update until nothing runs from the install folder", async () => {
+    const iss = await readFile(path.join(import.meta.dirname, "../../build/windows/genex-community.iss"), "utf8");
+    assert.match(
+      iss,
+      /function PrepareToInstall[\s\S]*if not WantsRelaunch\(\) then exit;[\s\S]*CountAppProcesses\(Dir\)/,
+    );
+  });
+});
+
 describe("Installer plugin choices", () => {
   it("reads booleans from community-plugins.json and ignores everything else", async () => {
     const dir = await tmpDir("installer-");
