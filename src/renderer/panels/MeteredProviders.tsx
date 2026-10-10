@@ -444,14 +444,42 @@ function OpenRouterRow({
   );
 }
 
+/** Community build: the OpenAI-compatible server (Jan, LM Studio, llama.cpp...) set in community.json. */
+function OpenAICompatibleRow({
+  engine,
+  onEnginesRefresh,
+}: { engine: EngineDescriptor } & Pick<MeteredProviderProps, "onEnginesRefresh">) {
+  const { run, error } = useRun();
+  const { checking, recheck } = useRecheck(EngineId.OpenAICompatible, onEnginesRefresh);
+  const ready = engine.status.code === EngineStatusCode.Ready;
+  const words: ProviderWords = { name: engine.label || "OpenAI-compatible", plans: "", guide: "" };
+  const view: RowView = ready
+    ? { tone: RowTone.Connected, status: WORDS.connected, line: engine.status.detail ?? null, actions: null }
+    : {
+        tone: RowTone.Danger,
+        status: WORDS.couldNotCheck,
+        line: engine.status.detail ?? null,
+        actions: <Button onClick={() => void run(recheck)}>{WORDS.tryAgain}</Button>,
+      };
+  return (
+    <ProviderCard words={words} engine={engine} view={view} checking={checking} connected={ready} problem={error}>
+      <p className="text-micro text-muted-foreground">
+        {"Se configura en %APPDATA%\\Genex Windows Community\\community.json (openaiCompatible)."}
+      </p>
+    </ProviderCard>
+  );
+}
+
 /** The metered rows, under the subscriptions: each only when its engine is registered. */
 export function MeteredProviderRows({ engines, onEnginesRefresh }: MeteredProviderProps): JSX.Element {
   const openCode = engines.find((engine) => engine.id === EngineId.OpenCode);
   const openRouter = engines.find((engine) => engine.id === EngineId.OpenRouter);
+  const openAICompatible = engines.find((engine) => engine.id === EngineId.OpenAICompatible);
   return (
     <>
       {openCode && <OpenCodeRow engine={openCode} onEnginesRefresh={onEnginesRefresh} />}
       {openRouter && <OpenRouterRow engine={openRouter} onEnginesRefresh={onEnginesRefresh} />}
+      {openAICompatible && <OpenAICompatibleRow engine={openAICompatible} onEnginesRefresh={onEnginesRefresh} />}
     </>
   );
 }
