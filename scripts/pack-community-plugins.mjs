@@ -38,9 +38,13 @@ for (const [id, name] of Object.entries(PLUGINS)) {
   const zip = path.join(out, `genex-plugin-${id}-v${version}.zip`);
   // Windows' own bsdtar writes zip archives (-a picks the format from .zip); elsewhere Info-ZIP.
   if (process.platform === "win32")
-    execFileSync(path.join(process.env.SystemRoot ?? "C:\\Windows", "System32", "tar.exe"), ["-a", "-c", "-f", zip, id], {
-      cwd: stage,
-    });
+    execFileSync(
+      path.join(process.env.SystemRoot ?? "C:\\Windows", "System32", "tar.exe"),
+      ["-a", "-c", "-f", zip, id],
+      {
+        cwd: stage,
+      },
+    );
   else execFileSync("zip", ["-r", "-q", zip, id], { cwd: stage });
   console.log(zip);
 }

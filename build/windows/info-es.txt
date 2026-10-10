@@ -1,0 +1,23 @@
+﻿GENEX WINDOWS COMMUNITY — qué vas a instalar
+
+Genex Windows Community es una versión NO OFICIAL para Windows de Genex, el estudio de escritorio donde agentes de IA crean juegos 3D con three.js. Es un fork de código abierto (licencia MIT) mantenido por la comunidad; no está hecho ni respaldado por los autores de Genex.
+
+Se instalará:
+  • El programa (unos 475 MB en disco).
+  • Accesos directos en el menú Inicio y/o el escritorio, si los marcas.
+  • Plugins opcionales, si los marcas (puedes activarlos o quitarlos después en Plugins):
+      – Juegos para móvil: controles táctiles, juego instalable (PWA) y APK de Android.
+      – Análisis de APK: analiza tus propias APK con apktool y jadx (solo análisis).
+  • Una entrada en «Aplicaciones instaladas» de Windows para desinstalarlo.
+
+Dónde guarda tus datos:
+  • Ajustes y conversaciones: %APPDATA%\Genex Windows Community
+  • Tus juegos: la carpeta «AI Games» de tu usuario.
+Al desinstalar, tus datos se conservan salvo que elijas borrarlos.
+
+Notas:
+  • No se actualiza solo y no toca una instalación oficial de Genex.
+  • El instalador no está firmado: Windows SmartScreen puede avisar («Más información» › «Ejecutar de todas formas»).
+  • Funciona con IA local (Jan, LM Studio, Ollama…) o con APIs compatibles con OpenAI.
+
+Más información: https://github.com/pilahito/genex-windows

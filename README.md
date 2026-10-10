@@ -43,17 +43,25 @@ iOS necesita un Mac con Xcode.
 ## Instalación en Windows
 
 1. Ve a [Releases](https://github.com/pilahito/genex-windows/releases) y descarga:
-   - `GenexWindowsCommunity-Setup.exe` (instalador, se instala en `%LOCALAPPDATA%\genex-community`), **o**
+   - `GenexWindowsCommunity-Setup-<versión>.exe`: **instalador con asistente** en español (o inglés). Eliges carpeta (por defecto `%LOCALAPPDATA%\Programs\Genex Windows Community`), accesos directos, plugins opcionales y si abrirlo al terminar. Se desinstala desde Aplicaciones instaladas y conserva tus datos salvo que elijas borrarlos. **O**
    - el `.zip` portable: descomprímelo donde quieras (por ejemplo `G:\GenexCommunity`) y abre `genex-community.exe`.
+   - A partir de la v0.1.8, Genex avisa solo cuando hay una versión nueva en estas Releases (**«Hay una nueva versión vX»** → *Actualizar ahora* / *Más tarde* / *Omitir esta versión*). Se puede desactivar en Ajustes › Acerca de › «Buscar actualizaciones al iniciar».
 2. El instalador no está firmado: Windows SmartScreen avisará. Pulsa **Más información → Ejecutar de todas formas**.
 3. Requisitos: Windows 10/11 x64, [Git para Windows](https://git-scm.com/download/win) (el sandbox usa Git Bash) y Node.js si tus juegos usan npm.
 4. La primera vez, Genex crea el usuario de Windows `srt-sandbox` (pide permiso de administrador una vez) y prepara permisos. Verás una ventana de progreso; puede tardar unos minutos.
+
+### El asistente de instalación
+
+| Información | Componentes (plugins opcionales) | Final |
+| --- | --- | --- |
+| ![Información](docs/screenshots/instalador-01-informacion.png) | ![Componentes](docs/screenshots/instalador-02-componentes.png) | ![Final](docs/screenshots/instalador-03-final.png) |
 
 ### Compilarlo tú mismo
 
 ```bash
 npm ci
-npm run make -- --platform win32 --arch x64   # en Windows
+npm run make -- --platform win32 --arch x64   # en Windows (zip portable)
+node scripts/build-installer.mjs              # asistente (necesita Inno Setup 6)
 ```
 
 El repositorio se compila solo: [`.github/workflows/build-windows.yml`](.github/workflows/build-windows.yml) genera el instalador en cada push a `main` y lo adjunta a una Release al subir una etiqueta `v*`.

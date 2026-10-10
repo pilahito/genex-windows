@@ -179,6 +179,7 @@ function studioCalls(bridge: BridgeCalls) {
     checkForUpdates: () => invoke("studio:update.check"),
     appAbout: () => invoke("studio:update.about"),
     openUpdateDownload: () => invoke("studio:update.download"),
+    updateAutoCheck: (on) => invoke("studio:update.autoCheck", { on }),
     engines: () => invoke("studio:engines"),
     providerUsage: () => invoke("studio:provider-usage"),
     hardware: () => invoke("studio:hardware"),

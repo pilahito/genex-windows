@@ -117,6 +117,8 @@ const FIXTURE_SAFE = [
   "studio:update.check",
   // Names the running version, platform and architecture; reads nothing else.
   "studio:update.about",
+  // Reads or flips the startup update check in this profile's own community.json; nothing else.
+  "studio:update.autoCheck",
   "studio:bootstrap",
   "studio:performance.mark",
   "studio:send",

@@ -6,13 +6,14 @@ import { type JSX, useEffect, useState } from "react";
 import { type AppAbout, UpdateAction, type UpdateCheckResult, UpdateCheckStatus } from "../../shared/app-update.ts";
 import { Button } from "../ui/Button.tsx";
 import { Icon } from "../ui/icons.tsx";
+import { Toggle } from "../ui/Toggle.tsx";
 import { ABOUT_WORDS, LICENSE_WORDS, problemWords } from "../words.ts";
 import { LicensesDialog } from "./LicensesDialog.tsx";
 
 /** Where About's links go. */
 const LINKS = {
   website: "https://genex.games",
-  source: "https://github.com/genex-games/genex-desktop",
+  source: "https://github.com/pilahito/genex-windows",
 } as const;
 /** How long "Copied" stands in for Copy version info. */
 const COPIED_MS = 1_500;
@@ -57,6 +58,26 @@ function Updates(): JSX.Element {
   const [checking, setChecking] = useState(false);
   const [result, setResult] = useState<UpdateCheckResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [autoCheck, setAutoCheck] = useState<boolean | null>(null);
+  useEffect(() => {
+    let live = true;
+    void window.studio
+      .updateAutoCheck()
+      .then((on) => {
+        if (live) setAutoCheck(on);
+      })
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, []);
+  const changeAutoCheck = (on: boolean) => {
+    setAutoCheck(on);
+    void window.studio
+      .updateAutoCheck(on)
+      .then(setAutoCheck)
+      .catch((cause) => setError(problemWords(cause)));
+  };
   const check = async () => {
     setChecking(true);
     setError(null);
@@ -72,6 +93,12 @@ function Updates(): JSX.Element {
     <section aria-label={ABOUT_WORDS.updates} data-row className="settings-card">
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="text-sm text-ink">{ABOUT_WORDS.updates}</span>
+        <span className="text-xs text-ink-3">{ABOUT_WORDS.feed}</span>
+        {autoCheck !== null && (
+          <span data-about-autocheck className="mt-1">
+            <Toggle on={autoCheck} onChange={changeAutoCheck} label={ABOUT_WORDS.autoCheck} size="sm" />
+          </span>
+        )}
         {result && (
           <span data-about-update-state role="status" className="text-ink-3">
             {resultLine(result)}
@@ -176,7 +203,7 @@ export function AboutSection(): JSX.Element {
       <Updates />
       <ul data-list className="settings-card">
         <LinkRow label={ABOUT_WORDS.website} value="genex.games" external onOpen={open(LINKS.website)} />
-        <LinkRow label={ABOUT_WORDS.source} value="GitHub" external onOpen={open(LINKS.source)} />
+        <LinkRow label={ABOUT_WORDS.source} value="pilahito/genex-windows" external onOpen={open(LINKS.source)} />
         <LinkRow
           data-settings-licenses
           label={ABOUT_WORDS.licenses}

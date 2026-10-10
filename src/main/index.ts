@@ -42,9 +42,11 @@ import {
   COMMUNITY_PRODUCT_NAME,
   SANDBOX_OFF_WARNING,
   applySandboxEnv,
+  communitySettingsPath,
   readCommunitySettings,
   showSplash,
 } from "./community.ts";
+import { createCommunityUpdater } from "./community-update-ui.ts";
 import { onSoundShortcut } from "./game-sound.ts";
 import type { GameFullScreen } from "./game-full-screen.ts";
 import { wireGameFullScreen } from "./full-screen-view.ts";
@@ -93,7 +95,7 @@ import {
   watchInstaller,
 } from "./auto-update.ts";
 import { RELEASE_CHECK_INTERVAL_MS, latestRelease } from "./release-check.ts";
-import { UpdateAction } from "../shared/app-update.ts";
+import { UpdateAction, type UpdateCheckResult, UpdateCheckStatus } from "../shared/app-update.ts";
 import { gatedHostTool } from "./core/genex-cli.ts";
 import { diagnosticsText, gatherDiagnostics } from "./diagnostics.ts";
 import { type FeedbackSources, sendFeedback } from "./feedback.ts";
@@ -429,6 +431,35 @@ const updateChecker = createUpdateChecker({
   askInstaller: () => installer.ask(),
   latestRelease: () => latestRelease({ repo: UPDATE_REPO, current: app.getVersion(), fetchImpl: net.fetch }),
 });
+/**
+ * Genex Windows Community: updates from pilahito/genex-windows releases only (./community-update.ts),
+ * in a released Windows build; development, smoke and self-test launches never check.
+ */
+const communityUpdates =
+  app.isPackaged && !dev && !isSmoke && !isSelfTest && process.platform === "win32"
+    ? createCommunityUpdater({
+        settingsFile: communitySettingsPath(userDataRoot),
+        log: (line) => studioLog.write("update", line),
+        parent: () => window ?? null,
+      })
+    : null;
+/** Check for Updates, as Settings → About reads it, through the fork's updater when it runs. */
+async function checkForUpdatesNow(): Promise<UpdateCheckResult> {
+  if (!communityUpdates) return updateChecker.check();
+  const current = app.getVersion();
+  const found = await communityUpdates.manual();
+  if (found.kind === "newer")
+    return {
+      status: UpdateCheckStatus.Waiting,
+      current,
+      update: { version: found.release.version, action: UpdateAction.Download },
+    };
+  return {
+    status: found.kind === "current" ? UpdateCheckStatus.Current : UpdateCheckStatus.Failed,
+    current,
+    update: null,
+  };
+}
 const uiEvents: UiEvent[] = [];
 const harnessLogBatch = new HarnessLogBatch((payload) => pushUiEvent({ type: UiEvent.HarnessLog, payload }));
 /** The React build the renderer bundles (`scripts/renderer-build.mjs`). */
@@ -1191,8 +1222,19 @@ async function main(): Promise<void> {
   const bootHandle = createIpcHandle(ipcMain, { fixture: fixtureNativePolicy, isStudioUi: isStudioWindow });
   registerBootIpc(bootHandle, { gate: bootGate, setWindowControls: paintWindowControls });
   registerUpdateIpc(bootHandle, {
-    updates,
-    check: () => updateChecker.check(),
+    updates: communityUpdates
+      ? {
+          ready: () => updates.ready(),
+          restart: () => updates.restart(),
+          // "Download" beside a found version opens the update window again.
+          download: () => communityUpdates.reopen(),
+        }
+      : updates,
+    check: () => checkForUpdatesNow(),
+    autoCheck: (on) => {
+      if (!communityUpdates) return false;
+      return on === undefined ? communityUpdates.prefs().autoCheck : communityUpdates.setAutoCheck(on);
+    },
     // An unpackaged build reports Electron's version, so only a packaged one names its own.
     about: () => ({
       version: app.isPackaged ? app.getVersion() : null,
@@ -1208,6 +1250,11 @@ async function main(): Promise<void> {
   }
   // The setup screen checks too: a release that fixes the sandbox problem can arrive through it.
   checkForUpdates();
+  // Genex Windows Community: a quiet look at the fork's releases once the studio has settled.
+  if (communityUpdates)
+    setTimeout(() => {
+      communityUpdates.atStartup().catch((err) => studioLog.write("update", errorMessage(err)));
+    }, 20_000);
   if (!dev) app.on("activate", reopenWindow);
 }
 
@@ -1262,6 +1309,17 @@ function addCheckForUpdatesMenuItem(): void {
 
 /** The menu's Check for Updates: ask, then say what it found and offer the one next step. */
 async function answerUpdateCheck(): Promise<void> {
+  if (communityUpdates) {
+    const found = await checkForUpdatesNow();
+    if (found.status === UpdateCheckStatus.Waiting) return; // its window is open
+    const current = found.status === UpdateCheckStatus.Current;
+    await dialog.showMessageBox({
+      message: current ? `Tienes la última versión (${found.current}).` : "No se pudo buscar actualizaciones.",
+      detail: current ? "" : "Revisa tu conexión e inténtalo de nuevo.",
+      buttons: ["Aceptar"],
+    });
+    return;
+  }
   const note = updateCheckNote(await updateChecker.check());
   const actLabel = note.act === UpdateAction.Download ? MESSAGE.download : MESSAGE.restart;
   const buttons = note.act ? [actLabel, MESSAGE.later] : [MESSAGE.ok];

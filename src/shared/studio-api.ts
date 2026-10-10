@@ -233,6 +233,8 @@ export interface StudioApi {
   openUpdateDownload(): Promise<boolean>;
   /** What is running (Settings → About): version, platform and architecture. */
   appAbout(): Promise<AppAbout>;
+  /** Genex Windows Community: whether startup checks for updates; `on` changes it. Answers the setting now. */
+  updateAutoCheck(on?: boolean): Promise<boolean>;
   bootstrap(): Promise<Bootstrap>;
   send(text: string, options?: ComposerSendOptions): Promise<boolean>;
   answerPlan(threadId: string, id: string, approved: boolean): Promise<boolean>;

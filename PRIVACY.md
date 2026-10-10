@@ -34,6 +34,12 @@ API for the latest published release every six hours (and when you choose Check 
 which sends nothing beyond the request itself; the download is yours to start. Development
 builds and builds you package yourself under another name do not check.
 
+**Genex Windows Community (this fork):** the update.electronjs.org check above is turned off. At
+startup (unless you turn it off in Settings › About) and when you choose Buscar actualizaciones, the
+app asks the public GitHub API for the latest release of `pilahito/genex-windows`, which sends
+nothing beyond the request itself. An update is downloaded only when you choose Actualizar ahora,
+from that release on GitHub, and is checked against the SHA-256 GitHub publishes for it.
+
 The catalog downloads listings and pinned plugin packages anonymously from its configured
 hosts and GitHub. Asset generation and publishing contact Genex using the connected account.
 Links to genex.games that Studio opens in your browser carry `s=desktop`, so the site can tell

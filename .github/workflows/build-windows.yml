@@ -1,5 +1,5 @@
 name: Build Windows (Genex Windows Community)
-# Builds the unsigned Windows x64 installer (Squirrel) and a portable zip.
+# Builds the unsigned Windows x64 installer wizard (Inno Setup), a portable zip and the optional plugin zips.
 # - push to main / workflow_dispatch: artifacts on the run.
 # - push of a tag v*: also creates a GitHub Release with the installer and zip attached.
 on:
@@ -37,12 +37,18 @@ jobs:
         run: node --test --test-concurrency=1 tests/conformance/community.test.ts tests/conformance/community-windows.test.ts tests/conformance/windows-sandbox.test.ts
       - name: Package (Squirrel installer + portable zip)
         run: npm run make -- --platform win32 --arch x64
+      - name: Installer wizard (Inno Setup)
+        run: |
+          choco install innosetup --no-progress -y
+          node scripts/build-installer.mjs
       - name: Optional plugins as separate zips
         run: node scripts/pack-community-plugins.mjs
       - name: Collect
         run: |
           mkdir -p dist-release
-          find out/make -type f \( -name "*.exe" -o -name "*.zip" -o -name "*.nupkg" -o -name "RELEASES" \) -exec cp {} dist-release/ \;
+          # The wizard installer replaces the silent Squirrel one; the portable zip stays.
+          cp out/installer/*.exe dist-release/
+          find out/make -type f -name "*.zip" -exec cp {} dist-release/ \;
           cp out/plugins/*.zip dist-release/
           ls -la dist-release
       - uses: actions/upload-artifact@v4

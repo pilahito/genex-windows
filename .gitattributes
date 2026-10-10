@@ -1,3 +1,5 @@
 # Every text file is LF in the index and in each checkout, Windows included (Biome, the tests and
 # the harness compare bytes). Git keeps files it detects as binary unchanged.
 * text=auto eol=lf
+build/windows/*.txt text eol=crlf
+build/windows/*.iss text eol=crlf

@@ -63,6 +63,7 @@ const METHODS = [
   "checkForUpdates",
   "openUpdateDownload",
   "appAbout",
+  "updateAutoCheck",
   "bootstrap",
   "performanceMark",
   "send",
@@ -237,6 +238,7 @@ function defaults(): Partial<Record<StudioMethod, () => unknown>> {
     setUpSandbox: () => ({ outcome: "installed", state: ready() }),
     readyUpdate: () => null,
     appAbout: () => ({ version: "0.1.0", platform: "darwin", arch: "arm64" }),
+    updateAutoCheck: (on?: boolean) => on ?? true,
     bootstrap: () => ({
       threadId: "thread-main",
       layout: {},

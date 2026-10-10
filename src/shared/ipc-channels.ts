@@ -31,6 +31,7 @@ export const STUDIO_INVOKE_CHANNELS = {
   "studio:update.check": "checkForUpdates",
   "studio:update.download": "openUpdateDownload",
   "studio:update.about": "appAbout",
+  "studio:update.autoCheck": "updateAutoCheck",
   "studio:bootstrap": "bootstrap",
   "studio:send": "send",
   "studio:plan.answer": "answerPlan",
@@ -209,6 +210,7 @@ export interface StudioInvokePayloads {
   "studio:update.check": undefined;
   "studio:update.download": undefined;
   "studio:update.about": undefined;
+  "studio:update.autoCheck": { on?: boolean };
   "studio:bootstrap": undefined;
   "studio:send": { text: string } & NonNullable<Arg<"send", 1>>;
   "studio:plan.answer": { threadId: string; id: string; approved: boolean };

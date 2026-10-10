@@ -13,6 +13,7 @@
  * Deliberately free of Electron imports so the whole core can be exercised under plain node; the
  * preview is injected through {@link PreviewPort}.
  */
+import { installerPluginChoices } from "./installer-plugins.ts";
 import { cp, lstat, readFile, readdir, realpath, rename, rm, stat } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -799,7 +800,11 @@ export class StudioCore {
       const shape = await readProjectShape(binding.directory);
       return shape.build ? path.join(binding.directory, "public") : binding.directory;
     };
-    this.plugins.seedEnabled = { blender: this.#settings.blender };
+    this.plugins.seedEnabled = {
+      // Genex Windows Community: the installer's optional-plugin choices (never Blender's own switch).
+      ...installerPluginChoices(this.options.paths.resources),
+      blender: this.#settings.blender,
+    };
     this.plugins.onChange = (c) => {
       this.emit(UiEvent.PluginsChanged, c);
       this.#connections.changed();

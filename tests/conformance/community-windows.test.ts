@@ -13,7 +13,139 @@ import { expandCandidates, runtimeOverride } from "../../src/substrate/plugins/n
 import { windowsNativeAllowed } from "../../src/substrate/plugins/native-process.ts";
 import { inspectPackage, validateManifest } from "../../src/substrate/plugins/manifest.ts";
 import { OpenAICompatibleEngine, resolveOpenAICompatible } from "../../src/substrate/engines/openai-compatible.ts";
+import { installerPluginChoices } from "../../src/main/installer-plugins.ts";
+import { createHash } from "node:crypto";
+import { existsSync } from "node:fs";
+import {
+  checkCommunityRelease,
+  downloadVerified,
+  notesHtml,
+  pickInstallerAsset,
+  readUpdatePrefs,
+  renderUpdatePage,
+  updateInstallerArgs,
+  writeUpdatePrefs,
+} from "../../src/main/community-update.ts";
 import { tmpDir } from "../helpers/tmp.ts";
+
+describe("Community updater (pilahito/genex-windows releases)", () => {
+  const repo = "pilahito/genex-windows";
+  const bytes = Buffer.from("instalador de prueba");
+  const sha = createHash("sha256").update(bytes).digest("hex");
+  const asset = {
+    name: "GenexWindowsCommunity-Setup-0.1.9.exe",
+    size: bytes.length,
+    digest: `sha256:${sha}`,
+    browser_download_url: `https://github.com/${repo}/releases/download/v0.1.9/GenexWindowsCommunity-Setup-0.1.9.exe`,
+  };
+  const latest = (body: object) => async () => new Response(JSON.stringify(body), { status: 200 });
+
+  it("finds a newer release with its notes and verified installer asset", async () => {
+    const found = await checkCommunityRelease({
+      current: "0.1.8",
+      fetchImpl: latest({
+        tag_name: "v0.1.9",
+        html_url: `https://github.com/${repo}/releases/tag/v0.1.9`,
+        body: "## Novedades",
+        assets: [{ ...asset, name: "Genex.zip" }, asset],
+      }),
+    });
+    assert.equal(found.kind, "newer");
+    if (found.kind !== "newer") return;
+    assert.equal(found.release.version, "0.1.9");
+    assert.equal(found.release.notes, "## Novedades");
+    assert.deepEqual(found.release.installer, {
+      name: asset.name,
+      size: asset.size,
+      sha256: sha,
+      url: asset.browser_download_url,
+    });
+    const same = await checkCommunityRelease({
+      current: "0.1.9",
+      fetchImpl: latest({ tag_name: "v0.1.9", html_url: `https://github.com/${repo}/releases/tag/v0.1.9` }),
+    });
+    assert.equal(same.kind, "current");
+    const elsewhere = await checkCommunityRelease({
+      current: "0.1.8",
+      fetchImpl: latest({
+        tag_name: "v9.0.0",
+        html_url: "https://github.com/genex-games/genex-desktop/releases/tag/v9.0.0",
+      }),
+    });
+    assert.equal(elsewhere.kind, "failed");
+  });
+
+  it("refuses installer assets without digest, from elsewhere or for another version", () => {
+    assert.equal(pickInstallerAsset(repo, "0.1.9", [{ ...asset, digest: null }]), null);
+    assert.equal(
+      pickInstallerAsset(repo, "0.1.9", [{ ...asset, browser_download_url: "https://evil.test/x.exe" }]),
+      null,
+    );
+    assert.equal(pickInstallerAsset(repo, "0.2.0", [asset]), null);
+  });
+
+  it("downloads only a file whose size and SHA-256 match", async () => {
+    const dir = await tmpDir("update-");
+    const dest = path.join(dir, asset.name);
+    const ok = { name: asset.name, size: asset.size, sha256: sha, url: asset.browser_download_url };
+    const serve = (data: Buffer) => async () => new Response(new Uint8Array(data), { status: 200 });
+    assert.equal(await downloadVerified(ok, dest, { fetchImpl: serve(bytes) }), dest);
+    assert.deepEqual(await readFile(dest), bytes);
+    const tampered = Buffer.from("instalador de pruebX");
+    await assert.rejects(downloadVerified(ok, `${dest}.2`, { fetchImpl: serve(tampered) }), /SHA-256/);
+    assert.equal(existsSync(`${dest}.2`) || existsSync(`${dest}.2.part`), false);
+    await assert.rejects(
+      downloadVerified(ok, `${dest}.3`, { fetchImpl: serve(Buffer.concat([bytes, bytes])) }),
+      /grande/,
+    );
+  });
+
+  it("renders notes as Markdown without raw HTML or non-https links", () => {
+    const html = notesHtml("# Hola\n\n<script>alert(1)</script>\n\n[web](https://x.test) [js](javascript:alert(1))");
+    assert.match(html, /<h1>Hola<\/h1>/);
+    assert.doesNotMatch(html, /<script>/);
+    assert.match(html, /<a href="https:\/\/x.test">web<\/a>/);
+    assert.doesNotMatch(html, /javascript:/);
+    const page = renderUpdatePage({ version: "0.1.9", url: "u", notes: "x", installer: null }, "0.1.8", "portable");
+    for (const label of ["Hay una nueva versión v0.1.9", "Actualizar ahora", "Más tarde", "Omitir esta versión"])
+      assert.ok(page.includes(label), label);
+    assert.match(page, /script-src|default-src 'none'/);
+  });
+
+  it("runs the installer silently in the same scope and relaunches", () => {
+    const pf = "C:\\Program Files";
+    assert.ok(
+      updateInstallerArgs("C:\\Program Files\\Genex Windows Community\\genex-community.exe", [pf]).includes(
+        "/ALLUSERS",
+      ),
+    );
+    const mine = updateInstallerArgs("D:\\Apps\\Genex Windows Community\\genex-community.exe", [pf]);
+    assert.ok(mine.includes("/CURRENTUSER") && mine.includes("/SILENT") && mine.includes("/RELAUNCH=1"));
+  });
+
+  it("keeps the update settings in community.json without touching the rest", async () => {
+    const file = path.join(await tmpDir("update-prefs-"), "community.json");
+    assert.deepEqual(readUpdatePrefs(file), { autoCheck: true, skippedVersion: null });
+    await writeFile(file, '{ "sandbox": true }');
+    writeUpdatePrefs(file, { skippedVersion: "0.1.9" });
+    writeUpdatePrefs(file, { autoCheck: false });
+    assert.deepEqual(JSON.parse(await readFile(file, "utf8")), {
+      sandbox: true,
+      updates: { autoCheck: false, skippedVersion: "0.1.9" },
+    });
+  });
+});
+
+describe("Installer plugin choices", () => {
+  it("reads booleans from community-plugins.json and ignores everything else", async () => {
+    const dir = await tmpDir("installer-");
+    assert.deepEqual(installerPluginChoices(dir), {});
+    await writeFile(path.join(dir, "community-plugins.json"), '{ "mobile": true, "apk": false, "x": "no" }');
+    assert.deepEqual(installerPluginChoices(dir), { mobile: true, apk: false });
+    await writeFile(path.join(dir, "community-plugins.json"), "not json");
+    assert.deepEqual(installerPluginChoices(dir), {});
+  });
+});
 
 describe("Gemini and xAI presets", () => {
   it("points at Gemini's OpenAI-compatible endpoint and is metered", () => {

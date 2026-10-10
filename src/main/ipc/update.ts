@@ -14,13 +14,19 @@ export interface UpdateIpcDeps {
   check(): Promise<UpdateCheckResult>;
   /** What is running, for Settings → About. */
   about(): AppAbout;
+  /** Genex Windows Community: the startup update check, read or changed. */
+  autoCheck?(on?: boolean): boolean;
 }
 
-export function registerUpdateIpc(handle: IpcHandle, { updates, check, about }: UpdateIpcDeps): void {
+export function registerUpdateIpc(handle: IpcHandle, { updates, check, about, autoCheck }: UpdateIpcDeps): void {
   handle("studio:update", () => updates.ready());
   handle("studio:update.restart", () => updates.restart());
   handle("studio:update.check", () => check());
   handle("studio:update.about", () => about());
+  handle("studio:update.autoCheck", (payload) => {
+    const on: unknown = payload && typeof payload === "object" ? payload.on : undefined;
+    return autoCheck ? autoCheck(typeof on === "boolean" ? on : undefined) : false;
+  });
   // No URL from the page: only the release page main checked and holds opens.
   handle("studio:update.download", () => updates.download());
 }
