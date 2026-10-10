@@ -91,6 +91,7 @@ describe("provider table", () => {
       ollama: "local",
       opencode: "metered",
       openrouter: "metered",
+      "openai-compatible": "local",
     });
     for (const id of ["openrouter", "opencode"]) assert.equal(isMetered(id), true, id);
     for (const id of ["bonsai", "ollama"]) assert.equal(isLocalEngine(id), true, id);

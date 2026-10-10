@@ -67,6 +67,7 @@ import { OllamaEngine, OllamaSidecar } from "../substrate/engines/ollama.ts";
 import { OpenCodeEngine } from "../substrate/engines/opencode.ts";
 import { LOCK_RECOVERY_DIR } from "../substrate/engines/ownership-locks.ts";
 import { OpenRouterEngine } from "../substrate/engines/openrouter.ts";
+import { OpenAICompatibleEngine, type OpenAICompatibleConfig } from "../substrate/engines/openai-compatible.ts";
 import { OPENROUTER_KEY_SECRET, secretKeyStore } from "../substrate/provider-keys.ts";
 import { EngineRegistry } from "../substrate/engines/registry.ts";
 import type { Engine, LiveToolResult } from "../substrate/engines/types.ts";
@@ -311,8 +312,10 @@ export interface StudioCoreOptions {
   claudeExecutable?: string;
   /** `codex` binary to spawn; unset = whatever is on PATH or in the usual install locations. */
   codexExecutable?: string;
-  /** Disable the sandbox only in tests that assert the unsandboxed path. */
+  /** Disable the sandbox: tests, or the community build's GENEX_SANDBOX=off (with a warning). */
   sandbox?: boolean;
+  /** The community build's OpenAI-compatible provider (Jan, LM Studio, llama.cpp, vLLM, DeepSeek...). */
+  openaiCompatible?: Partial<OpenAICompatibleConfig>;
   /** The self-edit gate's type check (substrate/type-gate.ts); the time limit is a test seam. */
   typeGate?: { timeoutMs?: number };
   /**
@@ -978,6 +981,7 @@ export class StudioCore {
     this.engines.setPreferredOrder([
       EngineId.Bonsai,
       EngineId.Ollama,
+      EngineId.OpenAICompatible,
       ...SUBSCRIPTION_ENGINES,
       EngineId.OpenCode,
       EngineId.OpenRouter,
@@ -1025,6 +1029,15 @@ export class StudioCore {
         toolPath: async () => (await this.sandbox.toolPath()) ?? process.env.PATH ?? "",
         keys: secretKeyStore(path.join(this.layout.secrets, "providers"), OPENROUTER_KEY_SECRET),
         onModelsChanged: () => this.emit(UiEvent.EnginesChanged, { engine: EngineId.OpenRouter }),
+      }),
+      // Community build: any OpenAI-compatible server (Jan by default), configured in community.json.
+      new OpenAICompatibleEngine({
+        root: path.join(this.layout.engineHomes, EngineId.OpenAICompatible),
+        scratchRoot: path.join(this.layout.scratch, EngineId.OpenAICompatible),
+        protectedPaths: this.#protectedPaths(),
+        toolPath: async () => (await this.sandbox.toolPath()) ?? process.env.PATH ?? "",
+        config: this.options.openaiCompatible ?? {},
+        onModelsChanged: () => this.emit(UiEvent.EnginesChanged, { engine: EngineId.OpenAICompatible }),
       }),
     ];
   }

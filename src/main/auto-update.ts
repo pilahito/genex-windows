@@ -26,12 +26,13 @@ import type { PublishedRelease, ReleaseCheck } from "./release-check.ts";
 import { ReleaseCheckKind } from "./release-check.ts";
 
 /** The release switch, on since the public launch; PRIVACY.md discloses the check. */
-export const AUTO_UPDATE_ENABLED = true;
+/** Genex Windows Community: off. The official feed must never replace this unofficial build. */
+export const AUTO_UPDATE_ENABLED = false;
 /**
  * The GitHub repository whose releases update.electronjs.org serves. `forge.config.cjs`
  * publishes to it and `package.json` names it (`auto-update.test.ts` holds the three together).
  */
-export const UPDATE_REPO = "genex-games/genex-desktop";
+export const UPDATE_REPO = "pilahito/genex-windows";
 /** How often an installed copy asks for a newer release (the `ms` syntax the library parses). */
 const UPDATE_CHECK_INTERVAL = "1 hour";
 /** The platforms update.electronjs.org serves. */

@@ -26,14 +26,14 @@ const {
 const { APP_BUNDLE_ID, localSigningHook, macSigning, windowsSigning } = require("./scripts/package-signing.cjs");
 const { version } = require("./package.json");
 
-const PRODUCT_NAME = "Genex";
-const EXECUTABLE_NAME = "genex";
-const HOMEPAGE = "https://github.com/genex-games/genex-desktop";
+const PRODUCT_NAME = "Genex Windows Community";
+const EXECUTABLE_NAME = "genex-community";
+const HOMEPAGE = "https://github.com/pilahito/genex-windows";
 const SUMMARY = "Self-improving AI game studio";
 /** The Linux desktop entry's generic name, beside the product name. */
 const GENERIC_NAME = "Game studio";
 /** Who the packages name as their authors. */
-const AUTHORS = "Genex contributors";
+const AUTHORS = "Genex contributors and Genex Windows Community contributors";
 const DESCRIPTION =
   "A desktop studio where coding agents build three.js games, run them in a live preview, judge the result and improve their own harness.";
 // Renditions of the 1024x1024 app icon master: .icns for macOS, .png for Linux, .ico for Windows.
@@ -57,7 +57,7 @@ const DEB_SCRIPTS = {
   postrm: path.join(__dirname, "build", "linux", "postrm"),
 };
 /** The Windows installer's file name, the same for every version so a download link can stay put. */
-const WINDOWS_SETUP_EXE = "Genex-Setup.exe";
+const WINDOWS_SETUP_EXE = "GenexWindowsCommunity-Setup.exe";
 /** Only with a WINDOWS_SIGN_* certificate, parameters or hook; otherwise unsigned. */
 const windowsSign = windowsSigning(process.env);
 /** Only with MACOS_SIGN_IDENTITY (and the notarytool API key); otherwise ad-hoc once packaged. */
@@ -168,7 +168,7 @@ module.exports = {
       },
     },
     // The darwin zip is also what update.electronjs.org serves to installed copies.
-    { name: "@electron-forge/maker-zip", platforms: ["darwin", "linux"] },
+    { name: "@electron-forge/maker-zip", platforms: ["darwin", "linux", "win32"] },
     {
       name: "@electron-forge/maker-deb",
       platforms: ["linux"],
@@ -238,7 +238,7 @@ module.exports = {
       name: "@electron-forge/publisher-github",
       config: {
         // The public repository, as UPDATE_REPO in src/main/auto-update.ts names it.
-        repository: { owner: "genex-games", name: "genex-desktop" },
+        repository: { owner: "pilahito", name: "genex-windows" },
         draft: true,
         // The tag is v<version>; a pre-release version (0.2.0-rc.1) makes a GitHub pre-release.
         prerelease: version.includes("-"),

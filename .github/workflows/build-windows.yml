@@ -1,0 +1,52 @@
+name: Build Windows (Genex Windows Community)
+# Builds the unsigned Windows x64 installer (Squirrel) and a portable zip.
+# - push to main / workflow_dispatch: artifacts on the run.
+# - push of a tag v*: also creates a GitHub Release with the installer and zip attached.
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: build-windows-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - name: Community unit tests
+        run: node --test --test-concurrency=1 tests/conformance/community.test.ts tests/conformance/windows-sandbox.test.ts
+      - name: Package (Squirrel installer + portable zip)
+        run: npm run make -- --platform win32 --arch x64
+      - name: Collect
+        run: |
+          mkdir -p dist-release
+          find out/make -type f \( -name "*.exe" -o -name "*.zip" -o -name "*.nupkg" -o -name "RELEASES" \) -exec cp {} dist-release/ \;
+          ls -la dist-release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: genex-windows-community-win32-x64
+          path: dist-release
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist-release/* \
+            --title "Genex Windows Community $GITHUB_REF_NAME" \
+            --notes "Unofficial Windows build of Genex (MIT). Unsigned: Windows SmartScreen will warn — More info › Run anyway. See README." \
+            || gh release upload "$GITHUB_REF_NAME" dist-release/* --clobber

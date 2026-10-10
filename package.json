@@ -1,13 +1,13 @@
 {
   "name": "ai-game-studio",
-  "productName": "Genex",
+  "productName": "Genex Windows Community",
   "version": "0.1.5",
   "private": true,
   "license": "MIT",
-  "description": "Self-improving AI game studio for macOS on Apple Silicon",
+  "description": "Genex Windows Community: unofficial Windows-friendly fork of Genex (AI game studio) with OpenAI-compatible local models (Jan, LM Studio, llama.cpp...)",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/genex-games/genex-desktop.git"
+    "url": "git+https://github.com/pilahito/genex-windows.git"
   },
   "type": "module",
   "main": "dist/main/main.mjs",
@@ -42,7 +42,7 @@
     "publish": "node scripts/build.mjs --release && electron-forge publish",
     "test:packaged": "node tests/e2e/run-packaged-smoke.mjs",
     "verify:harness": "node scripts/check-node.mjs && node --test --test-concurrency=1 --test-reporter=spec tests/conformance/harness-incidents.test.ts tests/conformance/scoreboard.test.ts",
-    "hooks:install": "git config core.hooksPath scripts/hooks && echo \"git hooks → scripts/hooks\"",
+    "hooks:install": "git config core.hooksPath scripts/hooks && echo \"git hooks \u2192 scripts/hooks\"",
     "test:optimization:e2e": "node scripts/build.mjs && node tests/e2e/run-optimization-e2e.mjs",
     "test:optimization:ui": "node tests/e2e/run-optimization-ui.mjs",
     "test:optimization:safety": "AG931_SAFETY_ONLY=1 AG931_OUTPUT=.studio-dev/evidence/optimization-safety node tests/e2e/run-optimization-e2e.mjs",
@@ -66,7 +66,7 @@
     "studio:dev": "node scripts/check-node.mjs && node scripts/studio-dev.ts",
     "test:agentic-readiness": "node tests/e2e/run-agentic-readiness.mjs",
     "runtime:check": "node scripts/check-runtime.mjs",
-    "postinstall": "node scripts/check-runtime.mjs",
+    "postinstall": "patch-package && node scripts/check-runtime.mjs",
     "test:design-ui": "node tests/e2e/run-design-system.mjs",
     "rebuild:terminal": "electron-rebuild --force --only node-pty && node node_modules/node-pty/scripts/post-install.js",
     "test:terminal": "node tests/e2e/run-terminal-ui.mjs",
@@ -119,6 +119,7 @@
     "lucide-react": "0.555.0",
     "marked": "^18.0.10",
     "ollama": "^0.6.3",
+    "patch-package": "^8.0.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "tailwind-merge": "3.4.0",

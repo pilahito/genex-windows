@@ -38,6 +38,13 @@ import path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 import { type ThreadStatusMap, UiEvent } from "../shared/ui-events.ts";
+import {
+  COMMUNITY_PRODUCT_NAME,
+  SANDBOX_OFF_WARNING,
+  applySandboxEnv,
+  readCommunitySettings,
+  showSplash,
+} from "./community.ts";
 import { onSoundShortcut } from "./game-sound.ts";
 import type { GameFullScreen } from "./game-full-screen.ts";
 import { wireGameFullScreen } from "./full-screen-view.ts";
@@ -599,7 +606,23 @@ function launchCoreOptions(): Partial<ConstructorParameters<typeof StudioCore>[0
 }
 
 async function createCore(userData: string): Promise<StudioCore> {
+  // Genex Windows Community: sandbox switch, ACL timeout and the OpenAI-compatible provider.
+  const community = readCommunitySettings(userData);
+  applySandboxEnv(community);
+  if (!community.sandbox) {
+    studioLog.write("main", `WARNING: ${SANDBOX_OFF_WARNING}`);
+    console.warn(`[community] ${SANDBOX_OFF_WARNING}`);
+    if (!isSmoke && !isSelfTest)
+      void dialog.showMessageBox({
+        type: "warning",
+        title: COMMUNITY_PRODUCT_NAME,
+        message: "Sandbox desactivado / Sandbox disabled",
+        detail: SANDBOX_OFF_WARNING,
+      });
+  }
   const studio = new StudioCore({
+    ...(community.sandbox ? {} : { sandbox: false }),
+    openaiCompatible: community.openaiCompatible,
     renderGameCover,
     paths: { userData, resources },
     // Smoke runs keep everything under their throwaway userData.
@@ -1349,8 +1372,13 @@ async function startStudio(): Promise<StartedStudio | null> {
   // The sandbox-setup fixture shows the screen over a real, ready core; its Retry just opens it.
   if (fixtureProviders && dev?.fixture === FixtureName.SandboxSetup)
     bootGate.hold(FIXTURE_SANDBOX_PROBLEM, async () => {});
-  const studio = await coreOrSetup();
-  return studio ? launchStudio(studio) : null;
+  const splash = !isSmoke && !isSelfTest && !dev ? showSplash() : null;
+  try {
+    const studio = await coreOrSetup();
+    return studio ? await launchStudio(studio) : null;
+  } finally {
+    if (splash && !splash.isDestroyed()) splash.destroy();
+  }
 }
 
 /**

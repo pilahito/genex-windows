@@ -75,7 +75,30 @@ const ENV_NAME = /^[A-Za-z_][A-Za-z0-9_]*$/;
  * PATH folders under the profile that are never granted: the Store's app-execution aliases
  * refuse extra ACL entries, and a failed grant would fail the whole session.
  */
-const UNGRANTABLE_TOOL_DIRS = [["AppData", "Local", "Microsoft", "WindowsApps"]] as const;
+const UNGRANTABLE_TOOL_DIRS = [
+  ["AppData", "Local", "Microsoft", "WindowsApps"],
+  // [genex-windows-community] Package-manager homes with hundreds of thousands of files: a
+  // recursive (OI)(CI) grant on them takes minutes and times out srt-win. Their shims still run
+  // through the Node/npm install in Program Files, which is outside the profile.
+  ["AppData", "Local", "pnpm"],
+  ["AppData", "Roaming", "npm"],
+  ["AppData", "Local", "npm-cache"],
+  ["AppData", "Local", "Yarn"],
+  ["scoop", "apps"],
+  [".cargo", "registry"],
+] as const;
+
+/**
+ * Extra PATH folders never granted to the sandbox user, from `GENEX_SANDBOX_SKIP_DIRS`
+ * (separated by `;`). Absolute folders, or folders relative to the profile.
+ */
+export function extraUngrantableDirs(profile: string, env: NodeJS.ProcessEnv = process.env): string[] {
+  return (env.GENEX_SANDBOX_SKIP_DIRS ?? "")
+    .split(";")
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .map((entry) => (win.isAbsolute(entry) ? entry : win.join(profile, entry)));
+}
 /**
  * Variables that stay the sandbox user's own: its profile, its home and srt's proxy plumbing.
  * The caller may still set one of them explicitly; a value inherited from the studio never wins.
@@ -195,7 +218,10 @@ export function grantableToolDirs(
   denied: readonly string[],
   exists: (dir: string) => boolean = existsSync,
 ): string[] {
-  const ungrantable = UNGRANTABLE_TOOL_DIRS.map((parts) => win.join(profile, ...parts));
+  const ungrantable = [
+    ...UNGRANTABLE_TOOL_DIRS.map((parts) => win.join(profile, ...parts)),
+    ...extraUngrantableDirs(profile),
+  ];
   const grantable = (dir: string) =>
     win.isAbsolute(dir) &&
     insideWindowsPath(profile, dir) &&

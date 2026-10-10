@@ -1,0 +1,18 @@
+Genex Windows Community
+=======================
+
+This is an UNOFFICIAL community fork of Genex (https://github.com/genex-games/genex-desktop),
+made to run better on Windows and with any OpenAI-compatible local model server.
+
+It is not made, endorsed or supported by the Genex authors (genex-games). "Genex" refers to the
+original project; the fork uses its own name and icon and does not use the official Genex logo.
+
+Original work: Copyright (c) 2026 genex.games, released under the MIT License (see LICENSE,
+kept unchanged). Third-party notices: THIRD-PARTY-NOTICES.md.
+
+Changes in this fork (Windows sandbox robustness, OpenAI-compatible provider, rebranding, CI):
+Copyright (c) 2026 pilahito and contributors, released under the same MIT License.
+
+The bundled @anthropic-ai/sandbox-runtime dependency is patched at install time by
+patches/@anthropic-ai+sandbox-runtime+0.0.73.patch (configurable ACL timeout); its own license
+applies to it.

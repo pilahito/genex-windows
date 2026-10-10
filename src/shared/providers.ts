@@ -65,6 +65,8 @@ export const EngineId = {
   Ollama: "ollama",
   OpenCode: "opencode",
   OpenRouter: "openrouter",
+  /** Community build: any OpenAI-compatible server (Jan, LM Studio, llama.cpp, vLLM, DeepSeek...). */
+  OpenAICompatible: "openai-compatible",
 } as const;
 export type EngineId = (typeof EngineId)[keyof typeof EngineId];
 
@@ -138,6 +140,15 @@ export const PROVIDERS = [
     login: "none",
     roles: "sessions",
     billing: "metered",
+    signIn: null,
+  },
+  {
+    id: EngineId.OpenAICompatible,
+    label: "OpenAI-compatible",
+    subscription: false,
+    login: "none",
+    roles: "sessions",
+    billing: "local",
     signIn: null,
   },
 ] as const satisfies readonly ProviderInfo[];

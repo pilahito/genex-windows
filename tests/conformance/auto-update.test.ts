@@ -72,9 +72,9 @@ test("every other launch stays off, and says why", () => {
   }
 });
 
-test("the release switch is on, so a released build checks for updates", () => {
-  assert.equal(AUTO_UPDATE_ENABLED, true);
-  assert.deepEqual(autoUpdateDecision({ ...released, enabled: AUTO_UPDATE_ENABLED }), {
+test("the community fork never updates from a feed; the switch still works when turned on", () => {
+  assert.equal(AUTO_UPDATE_ENABLED, false);
+  assert.deepEqual(autoUpdateDecision({ ...released, enabled: true }), {
     start: true,
     mode: UpdateMode.Install,
   });
