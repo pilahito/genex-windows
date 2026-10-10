@@ -23,12 +23,19 @@ Abre el juego en Chrome o Edge, pulsa F12 y activa la vista de dispositivo (Ctrl
 ## Opción 2: APK de Android (Capacitor)
 
 1. Exporta el juego a una carpeta fuera del juego, por ejemplo `C:\Juegos\__SLUG__-web`.
-2. Instala Node.js 20+ y Android Studio.
+2. Instala Node.js 20+ y Android Studio (o un JDK 21 + SDK de Android). Para comprobar qué falta:
+
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File docs\build-android.ps1 -Check
+   ```
+
 3. En PowerShell, dentro de la carpeta del juego:
 
    ```powershell
    powershell -ExecutionPolicy Bypass -File docs\build-android.ps1 -Export "C:\Juegos\__SLUG__-web"
    ```
+
+   Añade `-Install` para instalarlo directamente en el móvil conectado por USB (depuración USB activada) y `-Release` para generar también la versión release sin firmar.
 
 4. El APK queda en `__SLUG__-android\android\app\build\outputs\apk\debug\app-debug.apk`.
 

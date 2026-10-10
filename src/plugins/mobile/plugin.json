@@ -1,17 +1,17 @@
 {
   "apiVersion": 3,
   "id": "mobile",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "name": "Juegos para móvil",
   "publisher": "Genex Windows Community",
-  "description": "Crea juegos para móvil: controles táctiles, juego instalable (PWA) y APK de Android con Capacitor. Sin cuentas ni créditos.",
+  "description": "Convierte tus juegos de Genex en juegos para móvil: controles táctiles (joystick y botones), juego instalable (PWA) y APK de Android con Capacitor, compilado en tu PC. Sin cuentas ni créditos. Opcional: puedes desactivarlo o quitarlo en Plugins.",
   "icon": "icon.svg",
   "backend": "backend.mjs",
   "capabilities": ["project.read", "project.write"],
   "tools": [
     {
       "name": "status",
-      "description": "Mobile readiness of the open game: which mobile files exist (touch controls, PWA manifest, Android build script) and whether index.html and src/main.js are wired. Read the mobile-games skill first.",
+      "description": "Estado móvil del juego abierto: qué archivos móviles existen (controles táctiles, manifiesto PWA, script de Android) y si index.html y src/main.js ya están conectados. Úsalo primero y lee la habilidad mobile-games.",
       "parameters": {
         "type": "object",
         "properties": {}
@@ -19,35 +19,43 @@
     },
     {
       "name": "prepare",
-      "description": "Write the mobile kit into the open game: src/touch-controls.js (virtual joystick, drag-to-look and buttons feeding ctx.keys/ctx.look through __studio.injectInput), manifest.webmanifest (installable PWA), docs/MOBILE.md and docs/build-android.ps1 (Capacitor APK). Existing files are kept unless overwrite is true. Afterwards wire them into index.html and src/main.js as the returned guide says.",
+      "description": "Escribe el kit móvil en el juego abierto: src/touch-controls.js (joystick virtual, arrastrar para mirar y botones que alimentan ctx.keys/ctx.look vía __studio.injectInput), manifest.webmanifest (PWA instalable), docs/MOBILE.md y docs/build-android.ps1 (APK con Capacitor). No sobrescribe archivos existentes salvo overwrite=true. Después conecta los archivos en index.html y src/main.js siguiendo la guía devuelta.",
       "parameters": {
         "type": "object",
         "properties": {
           "name": {
             "type": "string",
-            "description": "The game's title, shown on the phone's home screen."
+            "description": "Título del juego, el que se ve en la pantalla de inicio del móvil."
           },
           "orientation": {
             "type": "string",
-            "description": "landscape, portrait or any."
+            "description": "landscape (acción, carreras), portrait (puzles, runner, idle) o any."
           },
           "appId": {
             "type": "string",
-            "description": "Optional Android application id such as com.author.game."
+            "description": "Id de aplicación Android opcional, p. ej. com.autor.juego."
           },
           "overwrite": {
             "type": "boolean",
-            "description": "Replace mobile files that already exist."
+            "description": "Reemplazar archivos móviles que ya existen."
           }
         },
         "required": ["name"]
+      }
+    },
+    {
+      "name": "android-env",
+      "description": "Comprueba (solo lectura) si este PC puede compilar el APK: Java 17+/21, SDK de Android, Node.js y móviles conectados por USB (adb). Dile al usuario exactamente qué falta antes de mandarle a compilar.",
+      "parameters": {
+        "type": "object",
+        "properties": {}
       }
     }
   ],
   "skills": [
     {
       "name": "mobile-games",
-      "summary": "Read when the user wants a game for phones or tablets (juego de móvil, Android, APK, PWA, controles táctiles): how to prepare touch controls, the installable PWA and the Android build, and how to make it run well on a phone.",
+      "summary": "Léela cuando el usuario quiera un juego para móvil o tablet (juego de móvil, Android, APK, PWA, controles táctiles): cómo preparar controles táctiles, la PWA y el APK, y cómo hacer que vaya bien en un teléfono.",
       "file": "skills/mobile-games/SKILL.md"
     }
   ],
@@ -57,6 +65,10 @@
     {
       "name": "help",
       "label": "Cómo crear un juego de móvil"
+    },
+    {
+      "name": "android-env",
+      "label": "Comprobar este PC (Android)"
     }
   ]
 }

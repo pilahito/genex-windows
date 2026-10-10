@@ -34,7 +34,7 @@ const L = NATIVE_MANIFEST_LIMITS;
 
 /** What a publisher reads when a native runtime or job declaration is refused. */
 const MESSAGE = {
-  CandidatePath: "Runtime candidates must use absolute, home:, studio: or storage: paths",
+  CandidatePath: "Runtime candidates must use absolute (or Windows drive), home:, studio: or storage: paths",
   InvalidInstall: "Invalid pinned native installation or missing trusted install action",
   InvalidRuntime: "Invalid native runtime",
   InvalidVersionPattern: "Invalid runtime version pattern",
@@ -86,6 +86,12 @@ function isValidRuntime(r: PluginNativeRuntime, ids: Set<string>): boolean {
 /** A candidate is absolute, or a `home:`, `studio:` or `storage:` path that stays inside its root. */
 function validateCandidate(candidate: string): void {
   if (candidate.startsWith("/")) return;
+  // Genex Windows Community: a Windows drive path (C:/Program Files/…/blender.exe). One `*`
+  // segment may stand for a versioned folder (Blender 4.2, Blender 5.2…); never `..`.
+  if (/^[A-Za-z]:[\\/]/.test(candidate)) {
+    if (candidate.split(/[\\/]/).includes("..")) throw new Error(MESSAGE.CandidatePath);
+    return;
+  }
   const alias = CANDIDATE_ALIAS.exec(candidate);
   if (!alias) throw new Error(MESSAGE.CandidatePath);
   assertRelativePath(alias[2]);

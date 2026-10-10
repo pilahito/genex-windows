@@ -138,6 +138,7 @@ import { StudioCore } from "./studio-core.ts";
 import { TerminalService, type TerminalHost } from "./terminal-service.ts";
 import { TITLEBAR_HEIGHT, windowChrome } from "./window-chrome.ts";
 import { appUserModelId, runSquirrelStep, squirrelStartup } from "./windows-install.ts";
+import { isSrtWinLockError, reapOrphanSrtWin, SANDBOX_LOCK_HELP } from "./windows-srt.ts";
 import { BootPhase, StudioPlatform, type SandboxProblem } from "../shared/boot.ts";
 import type { WindowControlColors } from "../shared/studio-api.ts";
 import { SandboxUnavailableError } from "../substrate/sandbox-unavailable.ts";
@@ -609,6 +610,10 @@ async function createCore(userData: string): Promise<StudioCore> {
   // Genex Windows Community: sandbox switch, ACL timeout and the OpenAI-compatible provider.
   const community = readCommunitySettings(userData);
   applySandboxEnv(community);
+  // Windows: a helper left by a crashed launch holds the sandbox's init lock and every later start
+  // would wait out the lock timeout and fail. End only helpers whose parent process is gone.
+  if (community.sandbox && process.platform === "win32" && !isSmoke && !isSelfTest)
+    await reapOrphanSrtWin((line) => studioLog.write("main", `[community] ${line}`));
   if (!community.sandbox) {
     studioLog.write("main", `WARNING: ${SANDBOX_OFF_WARNING}`);
     console.warn(`[community] ${SANDBOX_OFF_WARNING}`);
@@ -1598,7 +1603,9 @@ function reportStartupFailure(err: unknown): void {
     console.error("Renderer startup diagnostics", JSON.stringify(rendererConsole.slice(-20)));
     return;
   }
-  dialog.showErrorBox(MESSAGE.couldNotStart, (err as Error).stack ?? String(err));
+  const detail = (err as Error).stack ?? String(err);
+  // Genex Windows Community: say what to do, in Spanish, when the sandbox lock is held.
+  dialog.showErrorBox(MESSAGE.couldNotStart, isSrtWinLockError(err) ? `${SANDBOX_LOCK_HELP}\n\n${detail}` : detail);
 }
 
 /** The smoke, or one of the acceptance runs its flags choose; the exit code. */

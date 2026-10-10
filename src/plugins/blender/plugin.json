@@ -1,10 +1,10 @@
 {
   "apiVersion": 3,
   "id": "blender",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "name": "Local Blender",
   "publisher": "Studio",
-  "description": "Model 3D assets with Blender on this Mac. No account or credits.",
+  "description": "Modela recursos 3D con Blender instalado en tu PC (Windows o Mac). Sin cuenta ni créditos.",
   "icon": "icon.png",
   "backend": "backend.mjs",
   "capabilities": ["native-runtime", "project.read", "project.write", "jobs", "observe"],
@@ -69,16 +69,16 @@
   "actions": [
     {
       "name": "status",
-      "label": "Runtime and jobs"
+      "label": "Estado y trabajos"
     },
     {
       "name": "install",
-      "label": "Download Blender 5.2.1",
+      "label": "Descargar Blender 5.2.1 (solo Mac Apple Silicon)",
       "confirmation": "Download the pinned Blender 5.2.1 runtime (about 346 MB) into this plugin\u2019s storage. Studio verifies its digest. Existing external Blender installations stay unchanged."
     },
     {
       "name": "cancel-install",
-      "label": "Cancel download"
+      "label": "Cancelar descarga"
     }
   ],
   "nativeRuntimes": [
@@ -88,7 +88,14 @@
       "candidates": [
         "/Applications/Blender.app/Contents/MacOS/Blender",
         "home:Applications/Blender.app/Contents/MacOS/Blender",
-        "studio:tools/Blender.app/Contents/MacOS/Blender"
+        "studio:tools/Blender.app/Contents/MacOS/Blender",
+        "C:/Program Files/Blender Foundation/*/blender.exe",
+        "C:/Program Files (x86)/Steam/steamapps/common/Blender/blender.exe",
+        "C:/Blender/blender.exe",
+        "D:/Blender/blender.exe",
+        "E:/Blender/blender.exe",
+        "F:/Blender/blender.exe",
+        "G:/Blender/blender.exe"
       ],
       "version": {
         "args": ["-b", "--version"],

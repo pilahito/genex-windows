@@ -126,13 +126,28 @@ async function buildMobile(root, resources) {
   await cp(path.join(root, "src/plugins/mobile"), path.join(resources, "plugins/mobile"), { recursive: true });
 }
 
+/** Genex Windows Community: "Análisis de APK" (apktool + jadx), plain JavaScript like the mobile plugin. */
+async function buildApk(root, resources) {
+  await cp(path.join(root, "src/plugins/apk"), path.join(resources, "plugins/apk"), { recursive: true });
+}
+
+/**
+ * The community plugins are optional: GENEX_BUNDLE_COMMUNITY_PLUGINS=0 builds an app without them
+ * (they are also published as separate zips to load from Plugins › local folder).
+ */
+export const COMMUNITY_PLUGINS = ["mobile", "apk"];
+const bundlesCommunityPlugins = () => !/^(0|false|no|off)$/i.test(process.env.GENEX_BUNDLE_COMMUNITY_PLUGINS ?? "");
+
 /** Copies the SDK and builds the bundled plugins (and the example) into the app's resources. */
 export async function buildPlugins(root, resources, { dependencies = true } = {}) {
   await cp(path.join(root, "src/plugin-sdk"), path.join(resources, "plugin-sdk"), { recursive: true });
   await buildGenex(root, resources, { dependencies });
   const sdk = path.join(root, "src/plugin-sdk");
   await buildBlender(root, resources, sdk);
-  await buildMobile(root, resources);
+  if (bundlesCommunityPlugins()) {
+    await buildMobile(root, resources);
+    await buildApk(root, resources);
+  }
   await mkdir(path.join(resources, "examples"), { recursive: true });
   await cp(path.join(root, "src/plugins/example"), path.join(resources, "examples/example"), { recursive: true });
   const examplePanel = path.join(resources, "examples/example/panel.html");

@@ -66,6 +66,15 @@ export const OPENAI_COMPATIBLE_PRESETS: readonly OpenAICompatiblePreset[] = [
   { id: "openrouter", label: "OpenRouter", baseUrl: "https://openrouter.ai/api/v1", needsKey: true, local: false },
   { id: "deepseek", label: "DeepSeek", baseUrl: "https://api.deepseek.com/v1", needsKey: true, local: false },
   { id: "openai", label: "OpenAI API", baseUrl: "https://api.openai.com/v1", needsKey: true, local: false },
+  // Genex Windows Community: Gemini's OpenAI-compatible endpoint (API key from Google AI Studio).
+  {
+    id: "gemini",
+    label: "Google Gemini (API key)",
+    baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai",
+    needsKey: true,
+    local: false,
+  },
+  { id: "xai", label: "xAI Grok (API key)", baseUrl: "https://api.x.ai/v1", needsKey: true, local: false },
 ];
 
 export interface OpenAICompatibleConfig {

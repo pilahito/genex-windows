@@ -116,7 +116,7 @@ describe("Juegos para móvil plugin", () => {
     assert.equal(manifest.id, "mobile");
     assert.deepEqual(
       manifest.tools.map((t) => t.name),
-      ["status", "prepare"],
+      ["status", "prepare", "android-env"],
     );
     const game = await tmpDir("mobile-game-");
     await mkdir(path.join(game, "src"));

@@ -1,0 +1,87 @@
+{
+  "apiVersion": 3,
+  "id": "apk",
+  "version": "1.0.0",
+  "name": "Análisis de APK",
+  "publisher": "Genex Windows Community",
+  "description": "Descompila y analiza APK de Android con apktool y jadx: manifiesto, permisos, recursos, motor del juego y código Java. Para tus propias apps o con permiso del autor; solo análisis (no recompila, no firma, no quita protecciones). Opcional: puedes desactivarlo o quitarlo en Plugins.",
+  "icon": "icon.svg",
+  "backend": "backend.mjs",
+  "capabilities": ["project.read", "project.write", "network"],
+  "network": { "hosts": ["github.com", "objects.githubusercontent.com", "release-assets.githubusercontent.com"] },
+  "tools": [
+    {
+      "name": "status",
+      "description": "Comprueba Java 17+, apktool y jadx en este PC y lista los análisis del juego abierto (apk-analysis/) con su estado (running, done, failed). Úsalo primero y para seguir una descompilación en curso.",
+      "parameters": { "type": "object", "properties": {} }
+    },
+    {
+      "name": "decompile",
+      "description": "Descompila un APK del usuario en <juego>/apk-analysis/<nombre>/: apktool/ (manifiesto, res, assets, smali) y jadx/sources (Java). Genera INFORME.md. Un APK grande sigue en segundo plano: consulta apk__status. Solo para APK propios o con permiso del autor.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "apk": {
+            "type": "string",
+            "description": "Ruta del APK: absoluta (C:\\Users\\...\\juego.apk) o relativa al juego (apk/juego.apk)."
+          },
+          "name": {
+            "type": "string",
+            "description": "Nombre corto para la carpeta del análisis (por defecto, el del archivo)."
+          },
+          "tool": {
+            "type": "string",
+            "description": "both (por defecto), apktool (recursos y manifiesto, rápido) o jadx (solo código Java)."
+          },
+          "overwrite": { "type": "boolean", "description": "Repetir un análisis que ya existe." }
+        },
+        "required": ["apk"]
+      }
+    },
+    {
+      "name": "inspect",
+      "description": "Resumen estructurado de un análisis ya hecho: paquete, versión, SDK, permisos (marca los sensibles), actividades/servicios exportados, motor detectado (Unity, Godot, Flutter, web…), ABIs y librerías nativas. Reescribe INFORME.md.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Nombre del análisis (carpeta en apk-analysis/). Opcional si solo hay uno."
+          }
+        }
+      }
+    },
+    {
+      "name": "search",
+      "description": "Busca un texto (sin distinguir mayúsculas) en el código jadx, los recursos y el manifiesto de un análisis; devuelve archivo:línea. Útil para encontrar URLs, claves de configuración, nombres de escenas o clases.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string", "description": "Texto a buscar (mínimo 2 caracteres)." },
+          "name": { "type": "string", "description": "Nombre del análisis. Opcional si solo hay uno." },
+          "in": { "type": "string", "description": "todo (por defecto), codigo o recursos." },
+          "limit": { "type": "number", "description": "Máximo de resultados (1-100, por defecto 30)." }
+        },
+        "required": ["query"]
+      }
+    }
+  ],
+  "skills": [
+    {
+      "name": "apk-analysis",
+      "summary": "Léela cuando el usuario quiera analizar, descompilar, inspeccionar o hacer ingeniería inversa de un APK de Android (suyo o con permiso): pasos, qué contar y límites legales.",
+      "file": "skills/apk-analysis/SKILL.md"
+    }
+  ],
+  "panels": [],
+  "settings": [],
+  "actions": [
+    { "name": "help", "label": "Cómo analizar un APK" },
+    { "name": "status", "label": "Comprobar herramientas" },
+    {
+      "name": "install-tools",
+      "label": "Instalar herramientas (apktool + jadx)",
+      "confirmation": "Descargar apktool 3.0.3 y jadx 1.5.6 desde sus releases oficiales de GitHub (unos 60 MB) en G:\\Dev\\tools o %LOCALAPPDATA%\\GenexCommunity\\tools. Se verifica la suma SHA-256 de cada archivo."
+    }
+  ]
+}

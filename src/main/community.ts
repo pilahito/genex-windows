@@ -7,6 +7,7 @@
  *     "sandbox": true,                       // false = run agents without the process sandbox
  *     "aclTimeoutMs": 300000,                // srt-win ACL step timeout
  *     "sandboxSkipDirs": ["C:\\big\\dir"],   // PATH folders never granted to the sandbox user
+ *     "nativeJobsUnsandboxed": false,        // Windows: let Local Blender run without an OS sandbox
  *     "openaiCompatible": { "preset": "jan", "baseUrl": "...", "apiKey": "...", "models": ["..."] }
  *   }
  *
@@ -24,6 +25,8 @@ export const COMMUNITY_PRODUCT_NAME = "Genex Windows Community";
 
 export interface CommunitySettings {
   sandbox: boolean;
+  /** Windows: run plugin native jobs (Local Blender) without an OS sandbox. Off by default. */
+  nativeJobsUnsandboxed: boolean;
   aclTimeoutMs: number | null;
   sandboxSkipDirs: string[];
   openaiCompatible: Partial<OpenAICompatibleConfig>;
@@ -61,8 +64,11 @@ export function readCommunitySettings(userData: string, env: NodeJS.ProcessEnv =
   const models = env.GENEX_OPENAI_MODELS?.split(",")
     .map((m) => m.trim())
     .filter(Boolean);
+  const envNative = env.GENEX_NATIVE_UNSANDBOXED?.trim().toLowerCase();
+  const nativeJobsUnsandboxed = envNative ? !OFF.has(envNative) : saved.nativeJobsUnsandboxed === true;
   return {
     sandbox,
+    nativeJobsUnsandboxed,
     aclTimeoutMs: Number.isFinite(timeout) && timeout > 0 ? timeout : null,
     sandboxSkipDirs: skip,
     openaiCompatible: {
@@ -80,6 +86,7 @@ export function readCommunitySettings(userData: string, env: NodeJS.ProcessEnv =
  * to `grantableToolDirs` (GENEX_SANDBOX_SKIP_DIRS), which both read the environment.
  */
 export function applySandboxEnv(settings: CommunitySettings, env: NodeJS.ProcessEnv = process.env): void {
+  if (settings.nativeJobsUnsandboxed && !env.GENEX_NATIVE_UNSANDBOXED) env.GENEX_NATIVE_UNSANDBOXED = "1";
   if (settings.aclTimeoutMs && !env.GENEX_SANDBOX_ACL_TIMEOUT_MS)
     env.GENEX_SANDBOX_ACL_TIMEOUT_MS = String(settings.aclTimeoutMs);
   if (settings.sandboxSkipDirs.length)

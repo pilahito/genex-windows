@@ -1,7 +1,9 @@
 // Juegos para móvil — Genex Windows Community.
 // Prepara un juego de Genex para móvil: controles táctiles, PWA y un script que genera el APK de
 // Android con Capacitor. Solo escribe dentro de la carpeta del juego abierto (project.write).
-import { readFile } from "node:fs/promises";
+import { execFile } from "node:child_process";
+import { access, readFile } from "node:fs/promises";
+import path from "node:path";
 
 const TEMPLATES = new URL("./templates/", import.meta.url);
 
@@ -121,20 +123,110 @@ async function prepare(args, ctx) {
   };
 }
 
+const run = (file, args) =>
+  new Promise((resolve) => {
+    execFile(file, args, { timeout: 15000, windowsHide: true, encoding: "utf8" }, (error, stdout, stderr) =>
+      resolve({ ok: !error, text: `${stdout ?? ""}${stderr ?? ""}`.trim() }),
+    );
+  });
+const present = (file) =>
+  access(file).then(
+    () => true,
+    () => false,
+  );
+
+/** The major Java version in `java -version` output ("1.8.0" is 8, "21.0.2" is 21); 0 when unknown. */
+function javaMajor(text) {
+  const m = /version "(\d+)(?:\.(\d+))?/.exec(text);
+  if (!m) return 0;
+  return m[1] === "1" ? Number(m[2]) : Number(m[1]);
+}
+
+/** The first Java home (JDK 17+) found where build-android.ps1 looks, with its major version. */
+async function findJava() {
+  const exe = process.platform === "win32" ? "java.exe" : "java";
+  const homes = [
+    process.env.JAVA_HOME,
+    "G:\\Dev\\jdk21",
+    "C:\\Program Files\\Android\\Android Studio\\jbr",
+    "G:\\Dev\\jdk17",
+  ].filter(Boolean);
+  let best = null;
+  for (const home of homes) {
+    const java = path.join(home, "bin", exe);
+    if (!(await present(java))) continue;
+    const { text } = await run(java, ["-version"]);
+    const major = javaMajor(text);
+    if (!best || major > best.major) best = { home, major };
+  }
+  return best;
+}
+
+async function findSdk() {
+  const homes = [
+    process.env.ANDROID_HOME,
+    process.env.ANDROID_SDK_ROOT,
+    "G:\\Dev\\Android\\Sdk",
+    process.env.LOCALAPPDATA ? path.join(process.env.LOCALAPPDATA, "Android", "Sdk") : "",
+  ].filter(Boolean);
+  for (const home of homes) if (await present(path.join(home, "platform-tools"))) return home;
+  return null;
+}
+
+/** Can this PC build the APK? Java, Android SDK, Node.js and a phone over adb. Reads only. */
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: a flat checklist of four probes.
+async function androidEnv() {
+  const [java, sdk, node] = await Promise.all([
+    findJava(),
+    findSdk(),
+    run(process.platform === "win32" ? "node.exe" : "node", ["-v"]),
+  ]);
+  let devices = [];
+  if (sdk) {
+    const adb = path.join(sdk, "platform-tools", process.platform === "win32" ? "adb.exe" : "adb");
+    const { ok, text } = await run(adb, ["devices"]);
+    if (ok)
+      devices = text
+        .split(/\r?\n/)
+        .slice(1)
+        .filter((l) => /\tdevice$/.test(l))
+        .map((l) => l.split("\t")[0]);
+  }
+  const problems = [];
+  if (!java || java.major < 17) problems.push("Falta Java 17+ (instala Android Studio o un JDK 21 de adoptium.net).");
+  if (!sdk) problems.push("Falta el SDK de Android (abre Android Studio una vez o define ANDROID_HOME).");
+  if (!node.ok) problems.push("Falta Node.js (nodejs.org, versión LTS).");
+  return {
+    text: problems.length
+      ? `Este PC aún no puede compilar el APK: ${problems.join(" ")}`
+      : `Este PC puede compilar el APK (JDK ${java.major}${java.major >= 21 ? "" : ", se usará Capacitor 6"}).` +
+        (devices.length ? ` Móvil conectado: ${devices.join(", ")}.` : " No hay móvil conectado por USB."),
+    ready: problems.length === 0,
+    java,
+    androidSdk: sdk,
+    node: node.ok ? node.text : null,
+    devices,
+    command:
+      'powershell -ExecutionPolicy Bypass -File docs\\build-android.ps1 -Export "<carpeta exportada>" [-Install]',
+  };
+}
+
 const HELP =
   'Juegos para móvil: pide en el chat de un juego "hazlo para móvil" o "crea un juego de móvil". ' +
   "El agente prepara controles táctiles, la PWA y un script que genera el APK de Android con Capacitor " +
-  "(necesitas Node.js y Android Studio). Guía completa en docs/MOBILE.md del juego.";
+  "(necesitas Node.js, Java 17+ y el SDK de Android; «Comprobar este PC» te dice qué falta). Guía completa en docs/MOBILE.md del juego.";
 
 export async function activate() {
   return {
     async tool(name, args, ctx) {
       if (name === "status") return status(ctx);
       if (name === "prepare") return prepare(args ?? {}, ctx);
+      if (name === "android-env") return androidEnv();
       throw new Error(`Herramienta desconocida: ${name}`);
     },
     async action(name) {
       if (name === "help") return { text: HELP };
+      if (name === "android-env") return androidEnv();
       throw new Error(`Acción desconocida: ${name}`);
     },
   };

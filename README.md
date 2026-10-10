@@ -4,21 +4,24 @@
 >
 > No está hecho ni respaldado por los autores de Genex. Todo el mérito del programa original es suyo: ver [Créditos](#créditos).
 
-![Genex Windows Community en Windows 11, interfaz en español](docs/screenshots/windows-03-inicio-es.svg)
-*Captura real en **Windows 11** (Release v0.1.6-community, sandbox activado, interfaz en español).*
+![Genex Windows Community en Windows 11, interfaz en español](docs/screenshots/windows-05-inicio-v017.png)
+*Captura real en **Windows 11** (v0.1.7, sandbox activado, interfaz en español).*
 
 ## ¿Qué cambia respecto a la versión oficial?
 
 | | Genex oficial | Genex Windows Community |
 |---|---|---|
-| Arranque en Windows | Se puede quedar colgado o fallar con `srt-win acl grant ... timed out after 60000ms` | Tiempo de espera configurable (5 min por defecto), no da permisos a carpetas gigantes (pnpm, npm…), ventana de progreso mientras se prepara el sandbox |
+| Arranque en Windows | Se puede quedar colgado o fallar con `srt-win acl grant ... timed out after 60000ms` o `init lock ... not acquired` | Tiempo de espera configurable (5 min por defecto), no da permisos a carpetas gigantes (pnpm, npm…), ventana de progreso, y cierra los `srt-win.exe` huérfanos que bloqueaban el arranque |
 | Sandbox | Siempre activado | Activado por defecto; se puede **desactivar** con `GENEX_SANDBOX=off` (con aviso) |
-| Modelos | Claude Code, Codex, Bonsai, Ollama, OpenCode, OpenRouter | Todo lo anterior **+ proveedor "OpenAI-compatible"** con presets para Jan, LM Studio, llama.cpp, vLLM, Ollama (/v1), OpenRouter, DeepSeek y OpenAI |
+| Modelos | Claude Code, Codex, Bonsai, Ollama, OpenCode, OpenRouter | Todo lo anterior **+ proveedor "OpenAI-compatible"** con presets para Jan, LM Studio, llama.cpp, vLLM, Ollama (/v1), OpenRouter, DeepSeek, OpenAI, Google Gemini y xAI Grok ([guía](docs/GOOGLE-Y-MCP.md)) |
 | Actualizaciones | Auto-update desde el feed oficial | **Desactivadas** (nunca se sustituye por la versión oficial) |
 | Nombre / icono | Genex | Genex Windows Community, icono propio, marcado como "unofficial" |
 | Datos | `%APPDATA%\Genex` | `%APPDATA%\Genex Windows Community` (no toca tu instalación oficial) |
 | Idioma | Inglés | **Español por defecto** (Ajustes › Apariencia › Idioma / Language para volver al inglés) |
 | Juegos para móvil | — | **Plugin "Juegos para móvil"**: controles táctiles, juego instalable (PWA) y APK de Android con Capacitor |
+| Análisis de APK | — | **Plugin "Análisis de APK"** (apktool + jadx) para tus propias apps |
+| Blender local | Solo Mac | También **Windows** (`blender.exe` en Program Files, `C:`–`G:\Blender` o `GENEX_RUNTIME_BLENDER`) |
+| Plugins de la comunidad | — | **Opcionales**: se desactivan o quitan en Plugins; también como zips sueltos en cada release |
 
 ## Juegos para móvil
 
@@ -129,7 +132,33 @@ Los antivirus revisan cada cambio de permisos y pueden hacer que la preparación
 
 Windows Defender: *Seguridad de Windows → Protección contra virus y amenazas → Exclusiones → Agregar exclusión → Carpeta*.
 
+## Análisis de APK
+
+Plugin **Análisis de APK** (incluido, opcional). Para **tus propias APK o con permiso del autor**;
+solo análisis: no recompila, no firma ni quita protecciones.
+
+1. Plugins › Análisis de APK › **Instalar herramientas (apktool + jadx)** (descarga las releases
+   oficiales y verifica el SHA-256). Necesita Java 17+.
+2. Copia el APK a la carpeta `apk/` del juego (o dale la ruta completa) y pide en el chat
+   *"analiza este APK"*.
+3. El agente lo descompila en `apk-analysis/<nombre>/` (`apktool/`, `jadx/sources/`) y te resume en
+   `INFORME.md`: paquete, versión, permisos sensibles, componentes exportados, motor (Unity, Godot,
+   Flutter, web…) y librerías nativas. Puedes pedirle que busque textos en el código.
+
+## Plugins opcionales
+
+Los plugins de la comunidad (Juegos para móvil, Análisis de APK) vienen incluidos pero se pueden
+**desactivar o quitar** en Plugins. Cada release publica además `genex-plugin-mobile-vX.zip` y
+`genex-plugin-apk-vX.zip` para cargarlos en otra instalación de Genex (Plugins › Añadir › desde una
+carpeta local). Para compilar la app sin ellos: `GENEX_BUNDLE_COMMUNITY_PLUGINS=0 npm run make`.
+
 ## Capturas
+
+**Windows 11, v0.1.7** (capturas reales, sandbox activado):
+
+| | |
+|---|---|
+| ![Inicio v0.1.7](docs/screenshots/windows-05-inicio-v017.png) | ![Plugins: Análisis de APK y Juegos para móvil](docs/screenshots/windows-06-plugins-v017.png) |
 
 **Windows 11, v0.1.6** (capturas reales, sandbox activado):
 
@@ -141,19 +170,12 @@ Windows Defender: *Seguridad de Windows → Protección contra virus y amenazas 
 
 ![Proveedores de IA con Jan](docs/screenshots/linux-05-proveedores-jan.svg)
 
-**Windows 11, v0.1.5** (capturas reales, arrancado con `GENEX_SANDBOX=off`):
-
-| | |
-|---|---|
-| ![Inicio en Windows](docs/screenshots/windows-01-start-sandbox-off.png) | ![Aviso de sandbox desactivado](docs/screenshots/windows-02-sandbox-off-warning.png) |
-
 **Linux** (capturas reales, Xvfb, sin sandbox):
 
 | | |
 |---|---|
 | ![Inicio](docs/screenshots/linux-01-start.png) | ![Bienvenida](docs/screenshots/linux-02-onboarding.png) |
 
-TODO: capturas en Windows con el sandbox activado y con un juego creado con Jan.
 
 ## Desarrollo
 
@@ -161,11 +183,11 @@ TODO: capturas en Windows con el sandbox activado y con un juego creado con Jan.
 npm ci            # aplica el parche de sandbox-runtime (postinstall)
 npm run typecheck
 npm run lint
-node --test tests/conformance/community.test.ts
+node --test tests/conformance/community.test.ts tests/conformance/community-windows.test.ts
 npm start
 ```
 
-Archivos propios del fork: `src/main/community.ts`, `src/renderer/i18n/` (español), `src/plugins/mobile/` (Juegos para móvil), `src/substrate/engines/openai-compatible.ts`, `tests/conformance/community.test.ts`, `patches/`, `.github/workflows/build-windows.yml`, `NOTICE`. Los workflows originales están desactivados en `.github/upstream-workflows/`. El README original está en [README.upstream.md](README.upstream.md).
+Archivos propios del fork: `src/main/community.ts`, `src/renderer/i18n/` (español), `src/main/windows-srt.ts`, `src/plugins/mobile/` (Juegos para móvil), `src/plugins/apk/` (Análisis de APK), `scripts/pack-community-plugins.mjs`, `src/substrate/engines/openai-compatible.ts`, `tests/conformance/community.test.ts`, `patches/`, `.github/workflows/build-windows.yml`, `NOTICE`. Los workflows originales están desactivados en `.github/upstream-workflows/`. El README original está en [README.upstream.md](README.upstream.md).
 
 ## Créditos
 
@@ -183,4 +205,5 @@ Archivos propios del fork: `src/main/community.ts`, `src/renderer/i18n/` (españ
 - **OpenAI-compatible provider** with presets for Jan, LM Studio, llama.cpp, vLLM, Ollama, OpenRouter, DeepSeek and OpenAI, configured in `%APPDATA%\Genex Windows Community\community.json` or `GENEX_OPENAI_*` env vars. Tool calling uses the standard OpenAI `tools`/`tool_calls` API.
 - **Rebranded** (own name, icon and data folder), auto-update disabled, MIT license and original copyright kept, NOTICE added.
 - **CI:** `.github/workflows/build-windows.yml` builds the Windows installer and portable zip, and attaches them to a release for `v*` tags.
-- Screenshots are real: Windows 11 (sandbox off) and Linux (Xvfb). Windows screenshots with the sandbox on are TODO.
+- **v0.1.7:** ends orphaned `srt-win.exe` helpers that blocked startup, Local Blender works on Windows, optional "Análisis de APK" plugin (apktool + jadx, analysis only, for your own apps), improved "Juegos para móvil", Gemini and xAI presets. Community plugins can be disabled/removed and ship as separate zips.
+- Screenshots are real: Windows 11 (sandbox on) and Linux (Xvfb).

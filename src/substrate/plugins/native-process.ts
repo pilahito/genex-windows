@@ -404,8 +404,48 @@ function superviseJob(
   });
 }
 
+/**
+ * Genex Windows Community: Windows has no `sandbox-exec`. A native job (Local Blender) runs there
+ * only when the user opted in (community.json "nativeJobsUnsandboxed": true, or
+ * GENEX_NATIVE_UNSANDBOXED=1): then it runs as a plain child with a scratch HOME/TEMP and no
+ * console window. Without the opt-in it fails with a message saying how to enable it.
+ */
+export const WINDOWS_NATIVE_OPT_IN =
+  'En Windows, Blender local se ejecuta SIN el aislamiento de macOS. Para permitirlo, añade "nativeJobsUnsandboxed": true ' +
+  "a %APPDATA%\\Genex Windows Community\\community.json (o GENEX_NATIVE_UNSANDBOXED=1) y reinicia Genex. " +
+  "Los scripts de Blender que escriba la IA tendrán tus permisos de usuario: úsalo solo con modelos de confianza.";
+
+export function windowsNativeAllowed(env: NodeJS.ProcessEnv = process.env): boolean {
+  const v = env.GENEX_NATIVE_UNSANDBOXED?.trim().toLowerCase();
+  return !!v && !["0", "off", "false", "no"].includes(v);
+}
+
+async function runWindowsNativeProcess(p: NativeProcessRequest): Promise<NativeProcessResult> {
+  if (!windowsNativeAllowed()) throw new Error(WINDOWS_NATIVE_OPT_IN);
+  const home = path.join(p.scratch, "home");
+  await mkdir(home, { recursive: true });
+  const env: NodeJS.ProcessEnv = {
+    USERPROFILE: home,
+    HOME: home,
+    APPDATA: path.join(home, "AppData", "Roaming"),
+    LOCALAPPDATA: path.join(home, "AppData", "Local"),
+    TMP: p.scratch,
+    TEMP: p.scratch,
+    SystemRoot: process.env.SystemRoot ?? "C:\\Windows",
+    PATH: [path.dirname(p.binary), process.env.SystemRoot ? path.join(process.env.SystemRoot, "System32") : ""]
+      .filter(Boolean)
+      .join(";"),
+    LANG: "en_US.UTF-8",
+  };
+  return new Promise<NativeProcessResult>((resolve, reject) => {
+    const child = spawn(p.binary, p.args, { cwd: p.cwd, env, windowsHide: true, stdio: ["ignore", "pipe", "pipe"] });
+    superviseJob(child, p, resolve, reject);
+  });
+}
+
 export async function runNativeProcess(p: NativeProcessRequest): Promise<NativeProcessResult> {
   p.signal.throwIfAborted();
+  if (process.platform === StudioPlatform.Windows) return runWindowsNativeProcess(p);
   const { profile, home } = await prepareSandbox(p);
   return new Promise<NativeProcessResult>((resolve, reject) => {
     const child = spawn("/usr/bin/sandbox-exec", ["-f", profile, p.binary, ...p.args], {

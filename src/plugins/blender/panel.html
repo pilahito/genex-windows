@@ -6,25 +6,27 @@ button:hover{background:#ffffff24}button:disabled{opacity:.5;cursor:default}butt
 pre{white-space:pre-wrap;overflow-wrap:anywhere}#jobs{display:grid;gap:8px}#path{overflow-wrap:anywhere}progress{width:100%}
 </style></head><body>
 <h2>Local Blender</h2>
-<p>Model assets on this Mac. No Genex account or credits are used. Enabling this plugin makes its tools available in this chat’s next response.</p>
-<p id="status" role="status">Checking runtime…</p><p id="path"></p>
-<button id="recheck">Recheck</button> <button id="install" hidden>Download pinned Blender</button> <button id="cancel" hidden>Cancel download</button>
+<p>Modela recursos 3D con Blender en tu PC. No usa cuenta de Genex ni créditos. Al activar el plugin, sus herramientas están disponibles en la siguiente respuesta del chat.</p>
+<p id="win" hidden>Windows: Genex busca <code>blender.exe</code> en <code>C:\Program Files\Blender Foundation\…</code> y en <code>C:</code>–<code>G:\Blender</code>. Otra ruta: variable de entorno <code>GENEX_RUNTIME_BLENDER</code> con la ruta completa de <code>blender.exe</code>. Para ejecutar trabajos hay que permitirlo en <code>community.json</code> con <code>"nativeJobsUnsandboxed": true</code> (Blender corre con tus permisos).</p>
+<p id="status" role="status">Comprobando Blender…</p><p id="path"></p>
+<button id="recheck">Volver a comprobar</button> <button id="install" hidden>Descargar Blender fijado</button> <button id="cancel" hidden>Cancelar descarga</button>
 <p id="installation" role="status"></p><progress id="progress" hidden></progress>
 <pre id="error" role="alert"></pre><div id="jobs"></div>
 <!-- STUDIO_PANEL_SDK -->
 <script>
 const api=window.studioPlugin,$=id=>document.getElementById(id);
+const isWindows=/Windows/i.test(navigator.userAgent);if(isWindows)$('win').hidden=false;
 let busy=false,refreshing=false,last='',closed=false;
 async function refresh(){
   if(refreshing||closed)return;refreshing=true;
   try{
     const s=await api.call('action','status',{});if(closed)return;
     $('status').textContent=s.runtime.detail;$('path').textContent=s.runtime.path||'';
-    $('install').hidden=s.runtime.state==='ready';$('install').disabled=busy||!!s.installation?.active;
+    $('install').hidden=isWindows||s.runtime.state==='ready';$('install').disabled=busy||!!s.installation?.active;
     const job=s.installation;
     $('cancel').hidden=!job?.active;$('progress').hidden=!job?.active;
     if(job){
-      $('installation').textContent=`Download: ${job.phase} · ${Math.round(job.completed/1048576)} / ${Math.round(job.total/1048576)} MiB${job.error?' · '+job.error:''}`;
+      $('installation').textContent=`Descarga: ${job.phase} · ${Math.round(job.completed/1048576)} / ${Math.round(job.total/1048576)} MiB${job.error?' · '+job.error:''}`;
       $('progress').max=job.total;$('progress').value=job.completed;
     }
     const key=JSON.stringify(s.jobs);

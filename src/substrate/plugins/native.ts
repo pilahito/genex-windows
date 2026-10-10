@@ -105,6 +105,34 @@ const MESSAGE = {
   UnsafeArchive: "Unsafe runtime archive",
 } as const;
 
+/** `GENEX_RUNTIME_<ID>`: a binary the user chose for a runtime (e.g. GENEX_RUNTIME_BLENDER=G:\\Blender\\blender.exe). */
+export function runtimeOverride(id: string, env: NodeJS.ProcessEnv = process.env): string[] {
+  const value = env[`GENEX_RUNTIME_${id.toUpperCase().replace(/[^A-Z0-9]/g, "_")}`]?.trim();
+  return value && path.isAbsolute(value) ? [value] : [];
+}
+
+/**
+ * Candidates with one `*` segment (Windows: `C:/Program Files/Blender Foundation/*\/blender.exe`)
+ * become every matching folder, newest name first; a candidate without one stays as it is.
+ */
+export async function expandCandidates(candidates: string[]): Promise<string[]> {
+  const out: string[] = [];
+  for (const candidate of candidates) {
+    const parts = candidate.split(/[\\/]/);
+    const star = parts.indexOf("*");
+    if (star < 1) {
+      out.push(candidate);
+      continue;
+    }
+    const parent = parts.slice(0, star).join(path.sep) || path.sep;
+    const names = await readdir(parent.endsWith(":") ? `${parent}${path.sep}` : parent).catch(() => [] as string[]);
+    names.sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
+    for (const name of names)
+      out.push(path.join(parent.endsWith(":") ? `${parent}${path.sep}` : parent, name, ...parts.slice(star + 1)));
+  }
+  return out;
+}
+
 /** Whether `version` is at least `minimum`, comparing major, minor and patch. */
 const versionAtLeast = (version: string, minimum: string) => {
   const a = version.split(".").map(Number),
@@ -465,7 +493,9 @@ export class PluginNativeServices {
   async detect(runtime: PluginNativeRuntime, root: string): Promise<PluginNativeStatus> {
     let incompatible: PluginNativeStatus | undefined;
     const candidates = [
-      ...runtime.candidates.map((c) => this.#candidate(c, root)),
+      // Genex Windows Community: GENEX_RUNTIME_BLENDER (etc.) names the binary to use, first.
+      ...runtimeOverride(runtime.id),
+      ...(await expandCandidates(runtime.candidates.map((c) => this.#candidate(c, root)))),
       ...(runtime.install ? [path.join(root, "runtimes", runtime.id, runtime.install.executable)] : []),
     ];
     for (const candidate of candidates) {
