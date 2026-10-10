@@ -1,8 +1,8 @@
 # Genex Windows Community (no oficial)
 
-> **Fork no oficial** de [Genex](https://github.com/genex-games/genex-desktop) (licencia MIT), el estudio de escritorio donde agentes de IA crean juegos con three.js. Esta versión está pensada para **Windows** y para usar **IA local** (Jan, LM Studio, llama.cpp, Ollama…) o cualquier API compatible con OpenAI.
+> **Una versión para Windows basada en el código base de [Genex](https://github.com/genex-games/genex-desktop), con algunas mejoras.** No oficial. Genex es el estudio de escritorio donde agentes de IA crean juegos con three.js, creado por [genex.games](https://genex.games) y publicado con licencia MIT. Esta versión está pensada para **Windows** y para usar **IA local** (Jan, LM Studio, llama.cpp, Ollama…) o cualquier API compatible con OpenAI.
 >
-> No está hecho ni respaldado por los autores de Genex. Todo el mérito del programa original es suyo: ver [Créditos](#créditos).
+> No está hecha ni respaldada por los autores de Genex. **Todo el mérito del programa original es suyo**: ver [Créditos](#créditos).
 
 ![Genex Windows Community en Windows 11, interfaz en español](docs/screenshots/windows-05-inicio-v017.png)
 *Captura real en **Windows 11** (v0.1.7, sandbox activado, interfaz en español).*
@@ -197,12 +197,6 @@ npm start
 
 Archivos propios del fork: `src/main/community.ts`, `src/renderer/i18n/` (español), `src/main/windows-srt.ts`, `src/plugins/mobile/` (Juegos para móvil), `src/plugins/apk/` (Análisis de APK), `scripts/pack-community-plugins.mjs`, `src/substrate/engines/openai-compatible.ts`, `tests/conformance/community.test.ts`, `patches/`, `.github/workflows/build-windows.yml`, `NOTICE`. Los workflows originales están desactivados en `.github/upstream-workflows/`. El README original está en [README.upstream.md](README.upstream.md).
 
-## Créditos
-
-- **Genex** © 2026 genex.games y colaboradores, licencia MIT — <https://github.com/genex-games/genex-desktop>. Este fork mantiene su [LICENSE](LICENSE) sin cambios; ver [NOTICE](NOTICE) y [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
-- `@anthropic-ai/sandbox-runtime`, pi-ai, Electron, three.js y el resto de dependencias, bajo sus licencias.
-- Fork mantenido por [pilahito](https://github.com/pilahito).
-
 ---
 
 ## English summary
@@ -215,3 +209,15 @@ Archivos propios del fork: `src/main/community.ts`, `src/renderer/i18n/` (españ
 - **CI:** `.github/workflows/build-windows.yml` builds the Windows installer and portable zip, and attaches them to a release for `v*` tags.
 - **v0.1.7:** ends orphaned `srt-win.exe` helpers that blocked startup, Local Blender works on Windows, optional "Análisis de APK" plugin (apktool + jadx, analysis only, for your own apps), improved "Juegos para móvil", Gemini and xAI presets. Community plugins can be disabled/removed and ship as separate zips.
 - Screenshots are real: Windows 11 (sandbox on) and Linux (Xvfb).
+
+## Créditos
+
+Genex Windows Community es **una versión para Windows basada en el código base de Genex, con algunas mejoras**. Es no oficial y todo el mérito del programa original corresponde a sus autores.
+
+- **Basado en [Genex](https://github.com/genex-games/genex-desktop) de [genex.games](https://genex.games)**, licencia MIT. Copyright (c) 2026 genex.games. El aviso de copyright y la licencia originales se conservan sin cambios en [`LICENSE`](LICENSE); ver también [`NOTICE`](NOTICE). Este fork no está hecho ni respaldado por los autores de Genex.
+- Cambios de este fork: Copyright (c) 2026 [pilahito](https://github.com/pilahito) y colaboradores, misma licencia MIT.
+- `@anthropic-ai/sandbox-runtime`, pi-ai y el resto de dependencias del programa original, bajo sus licencias.
+- Plugin **Análisis de APK**: usa [Apktool](https://github.com/iBotPeaches/Apktool) (Apache 2.0) y [jadx](https://github.com/skylot/jadx) (Apache 2.0). No se incluyen en el programa: se descargan de sus releases oficiales solo si pulsas «Instalar herramientas».
+- Plugin **Juegos para móvil**: genera proyectos con [Capacitor](https://github.com/ionic-team/capacitor) de Ionic (MIT); se instala con npm en cada juego, no viene incluido.
+- Instalador creado con [Inno Setup](https://jrsoftware.org/isinfo.php) (licencia de Inno Setup). Programa basado en [Electron](https://github.com/electron/electron) (MIT); los juegos usan [three.js](https://github.com/mrdoob/three.js) (MIT).
+- El resto de dependencias y sus licencias: [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md) y, dentro de la app, Ajustes › Acerca de › Licencias.

@@ -1,6 +1,8 @@
 ﻿GENEX WINDOWS COMMUNITY — what you are installing
 
-Genex Windows Community is an UNOFFICIAL Windows build of Genex, the desktop studio where AI agents build 3D games with three.js. It is an open-source fork (MIT license) maintained by the community; it is not made or endorsed by the Genex authors.
+Genex Windows Community is a Windows version based on the Genex code base, with some improvements. Genex is the desktop studio where AI agents build 3D games with three.js, created by genex.games (https://github.com/genex-games/genex-desktop) and released under the MIT license.
+
+This version is UNOFFICIAL: it is not made or endorsed by the Genex authors, and all credit for the original program goes to them.
 
 This will install:
   • The application (about 475 MB on disk).
@@ -16,8 +18,15 @@ Where your data lives:
 Uninstalling keeps your data unless you choose to delete it.
 
 Notes:
-  • It does not update itself and does not touch an official Genex install.
+  • It tells you when a new version is published at https://github.com/pilahito/genex-windows/releases (can be turned off in Settings › About). It does not touch an official Genex install.
   • The installer is not signed: Windows SmartScreen may warn ("More info" › "Run anyway").
   • Works with local AI (Jan, LM Studio, Ollama…) or OpenAI-compatible APIs.
+
+Credits:
+  • Genex — Copyright (c) 2026 genex.games, MIT license (the previous page shows the original notice, unchanged). https://github.com/genex-games/genex-desktop
+  • Changes in this version — Copyright (c) 2026 pilahito and contributors, MIT license.
+  • Apktool (https://github.com/iBotPeaches/Apktool) and jadx (https://github.com/skylot/jadx), Apache 2.0: not included; the APK analysis plugin downloads them only when you ask.
+  • Capacitor by Ionic (https://github.com/ionic-team/capacitor), MIT: the Mobile games plugin installs it with npm in each game.
+  • Electron and three.js (MIT); installer made with Inno Setup. Other licenses: THIRD-PARTY-NOTICES.md and Settings › About › Licenses.
 
 More information: https://github.com/pilahito/genex-windows

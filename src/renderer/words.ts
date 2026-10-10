@@ -1624,7 +1624,7 @@ export const FEEDBACK_WORDS = {
 /** Settings → About: the running version and Check for Updates (`panels/AboutSection.tsx`). */
 export const ABOUT_WORDS = {
   tab: "About",
-  product: "Genex",
+  product: "Genex Windows Community",
   version: (version: string) => `Genex ${version}`,
   check: "Buscar actualizaciones",
   checking: "Buscando…",
@@ -1638,11 +1638,16 @@ export const ABOUT_WORDS = {
   download: "Ver la nueva versión",
   autoCheck: "Buscar actualizaciones al iniciar",
   feed: "Desde las releases de pilahito/genex-windows en GitHub (no la versión oficial).",
-  tagline: "The desktop app to build & publish games with AI",
+  tagline:
+    "Una versión para Windows basada en el código base de Genex, con algunas mejoras. No oficial: todo el mérito del programa original es de sus autores.",
+  credits: "Créditos",
+  upstream: "Genex original (genex.games, licencia MIT)",
+  creditsText:
+    "Basado en Genex de genex.games, licencia MIT; su aviso de copyright original se conserva intacto. Cambios de esta versión: pilahito y colaboradores (MIT). Plugins: Apktool y jadx (Apache 2.0, se descargan aparte), Capacitor de Ionic (MIT, vía npm). Electron y three.js (MIT). El resto, en Licencias.",
   versionLine: (version: string | null) => (version ? `Version ${version}` : "Development build"),
   updates: "Actualizaciones",
-  website: "Website",
-  source: "Source code",
+  website: "Web de Genex (original)",
+  source: "Código de esta versión",
   licenses: "Licenses",
   copy: "Copy version info",
   copied: "Copied",

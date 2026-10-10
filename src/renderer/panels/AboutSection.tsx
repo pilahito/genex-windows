@@ -13,6 +13,7 @@ import { LicensesDialog } from "./LicensesDialog.tsx";
 /** Where About's links go. */
 const LINKS = {
   website: "https://genex.games",
+  upstream: "https://github.com/genex-games/genex-desktop",
   source: "https://github.com/pilahito/genex-windows",
 } as const;
 /** How long "Copied" stands in for Copy version info. */
@@ -201,7 +202,17 @@ export function AboutSection(): JSX.Element {
       </section>
       <p className="-mt-2 max-w-[520px] px-4 text-sm text-ink-2">{ABOUT_WORDS.tagline}</p>
       <Updates />
+      <section aria-label={ABOUT_WORDS.credits} data-about-credits className="settings-card flex flex-col gap-1">
+        <span className="text-sm text-ink">{ABOUT_WORDS.credits}</span>
+        <span className="text-xs text-ink-3">{ABOUT_WORDS.creditsText}</span>
+      </section>
       <ul data-list className="settings-card">
+        <LinkRow
+          label={ABOUT_WORDS.upstream}
+          value="genex-games/genex-desktop"
+          external
+          onOpen={open(LINKS.upstream)}
+        />
         <LinkRow label={ABOUT_WORDS.website} value="genex.games" external onOpen={open(LINKS.website)} />
         <LinkRow label={ABOUT_WORDS.source} value="pilahito/genex-windows" external onOpen={open(LINKS.source)} />
         <LinkRow

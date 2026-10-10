@@ -39,6 +39,7 @@ PrivilegesRequiredOverridesAllowed=dialog
 DefaultDirName={autopf}\{#AppName}
 DisableDirPage=no
 DefaultGroupName={#AppName}
+DisableWelcomePage=no
 DisableProgramGroupPage=yes
 UsePreviousAppDir=yes
 LicenseFile={#RepoRoot}\LICENSE
@@ -63,6 +64,10 @@ SetupLogging=yes
 [Languages]
 Name: "es"; MessagesFile: "compiler:Languages\Spanish.isl"; InfoBeforeFile: "{#RepoRoot}\build\windows\info-es.txt"
 Name: "en"; MessagesFile: "compiler:Default.isl"; InfoBeforeFile: "{#RepoRoot}\build\windows\info-en.txt"
+
+[Messages]
+es.WelcomeLabel2=Se instalará [name/ver] en tu equipo.%n%nGenex Windows Community es una versión para Windows basada en el código base de Genex, con algunas mejoras. Es NO OFICIAL: todo el mérito del programa original es de sus autores (genex.games, github.com/genex-games/genex-desktop), que lo publican con licencia MIT.%n%nSe recomienda cerrar Genex antes de continuar.
+en.WelcomeLabel2=This will install [name/ver] on your computer.%n%nGenex Windows Community is a Windows version based on the Genex code base, with some improvements. It is UNOFFICIAL: all credit for the original program goes to its authors (genex.games, github.com/genex-games/genex-desktop), who release it under the MIT license.%n%nIt is recommended that you close Genex before continuing.
 
 [CustomMessages]
 es.CompMain=Genex Windows Community (programa)
