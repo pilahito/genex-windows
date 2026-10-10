@@ -1,0 +1,62 @@
+{
+  "apiVersion": 3,
+  "id": "mobile",
+  "version": "1.0.0",
+  "name": "Juegos para móvil",
+  "publisher": "Genex Windows Community",
+  "description": "Crea juegos para móvil: controles táctiles, juego instalable (PWA) y APK de Android con Capacitor. Sin cuentas ni créditos.",
+  "icon": "icon.svg",
+  "backend": "backend.mjs",
+  "capabilities": ["project.read", "project.write"],
+  "tools": [
+    {
+      "name": "status",
+      "description": "Mobile readiness of the open game: which mobile files exist (touch controls, PWA manifest, Android build script) and whether index.html and src/main.js are wired. Read the mobile-games skill first.",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "prepare",
+      "description": "Write the mobile kit into the open game: src/touch-controls.js (virtual joystick, drag-to-look and buttons feeding ctx.keys/ctx.look through __studio.injectInput), manifest.webmanifest (installable PWA), docs/MOBILE.md and docs/build-android.ps1 (Capacitor APK). Existing files are kept unless overwrite is true. Afterwards wire them into index.html and src/main.js as the returned guide says.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The game's title, shown on the phone's home screen."
+          },
+          "orientation": {
+            "type": "string",
+            "description": "landscape, portrait or any."
+          },
+          "appId": {
+            "type": "string",
+            "description": "Optional Android application id such as com.author.game."
+          },
+          "overwrite": {
+            "type": "boolean",
+            "description": "Replace mobile files that already exist."
+          }
+        },
+        "required": ["name"]
+      }
+    }
+  ],
+  "skills": [
+    {
+      "name": "mobile-games",
+      "summary": "Read when the user wants a game for phones or tablets (juego de móvil, Android, APK, PWA, controles táctiles): how to prepare touch controls, the installable PWA and the Android build, and how to make it run well on a phone.",
+      "file": "skills/mobile-games/SKILL.md"
+    }
+  ],
+  "panels": [],
+  "settings": [],
+  "actions": [
+    {
+      "name": "help",
+      "label": "Cómo crear un juego de móvil"
+    }
+  ]
+}
