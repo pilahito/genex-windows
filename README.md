@@ -4,8 +4,8 @@
 >
 > No está hecho ni respaldado por los autores de Genex. Todo el mérito del programa original es suyo: ver [Créditos](#créditos).
 
-![Genex Windows Community en Windows 11](docs/screenshots/windows-01-start-sandbox-off.png)
-*Captura real en **Windows 11** (build de la Release v0.1.5-community.1, arrancado con `GENEX_SANDBOX=off`, por eso sale el aviso).*
+![Genex Windows Community en Windows 11, interfaz en español](docs/screenshots/windows-03-inicio-es.svg)
+*Captura real en **Windows 11** (Release v0.1.6-community, sandbox activado, interfaz en español).*
 
 ## ¿Qué cambia respecto a la versión oficial?
 
@@ -131,7 +131,17 @@ Windows Defender: *Seguridad de Windows → Protección contra virus y amenazas 
 
 ## Capturas
 
-**Windows 11** (capturas reales, arrancado con `GENEX_SANDBOX=off`):
+**Windows 11, v0.1.6** (capturas reales, sandbox activado):
+
+| | |
+|---|---|
+| ![Inicio en español](docs/screenshots/windows-03-inicio-es.svg) | ![Plugins con Juegos para móvil](docs/screenshots/windows-04-plugins-movil.svg) |
+
+**Ajustes → Proveedores de IA** con la tarjeta de Jan (OpenAI-compatible) (Linux, sin Jan arrancado):
+
+![Proveedores de IA con Jan](docs/screenshots/linux-05-proveedores-jan.svg)
+
+**Windows 11, v0.1.5** (capturas reales, arrancado con `GENEX_SANDBOX=off`):
 
 | | |
 |---|---|
