@@ -89,11 +89,11 @@ export function applySandboxEnv(settings: CommunitySettings, env: NodeJS.Process
 }
 
 export const SANDBOX_OFF_WARNING =
-  'The process sandbox is OFF (GENEX_SANDBOX=off or "sandbox": false in community.json). ' +
-  "AI agents will run commands with your full user permissions: they can read and change any of your files. " +
-  "Only use this with models and projects you trust.";
+  'El sandbox de procesos está DESACTIVADO (GENEX_SANDBOX=off o "sandbox": false en community.json). ' +
+  "Los agentes de IA ejecutarán comandos con todos tus permisos de usuario: pueden leer y cambiar cualquiera de tus archivos. " +
+  "Úsalo solo con modelos y proyectos de confianza.";
 
-const SPLASH_HTML = (product: string) => `<!doctype html><meta charset="utf-8"><title>${product}</title>
+const SPLASH_HTML = (product: string) => `<!doctype html><html lang="es"><meta charset="utf-8"><title>${product}</title>
 <style>
 body{margin:0;font:14px system-ui,Segoe UI,sans-serif;background:#16141c;color:#eee;display:flex;
 flex-direction:column;align-items:center;justify-content:center;height:100vh;user-select:none}
@@ -102,7 +102,7 @@ h1{font-size:18px;margin:0 0 8px}p{margin:4px 24px;color:#aaa;text-align:center}
 .bar i{display:block;width:30%;height:100%;background:#ff4fa3;animation:m 1.2s infinite ease-in-out}
 @keyframes m{0%{margin-left:-30%}100%{margin-left:100%}}
 </style><h1>${product}</h1><p>Preparando el espacio de trabajo protegido (sandbox)…</p>
-<p>Setting up the protected workspace. The first launch can take several minutes;<br>an antivirus may slow it down.</p>
+<p>El primer arranque puede tardar varios minutos;<br>un antivirus puede hacerlo más lento.</p>
 <div class="bar"><i></i></div><p id="t" style="margin-top:14px;font-size:12px">0 s</p>
 <script>let s=0;setInterval(()=>{document.getElementById('t').textContent=(++s)+' s'},1000)</script>`;
 

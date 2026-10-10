@@ -17,6 +17,25 @@
 | Actualizaciones | Auto-update desde el feed oficial | **Desactivadas** (nunca se sustituye por la versión oficial) |
 | Nombre / icono | Genex | Genex Windows Community, icono propio, marcado como "unofficial" |
 | Datos | `%APPDATA%\Genex` | `%APPDATA%\Genex Windows Community` (no toca tu instalación oficial) |
+| Idioma | Inglés | **Español por defecto** (Ajustes › Apariencia › Idioma / Language para volver al inglés) |
+| Juegos para móvil | — | **Plugin "Juegos para móvil"**: controles táctiles, juego instalable (PWA) y APK de Android con Capacitor |
+
+## Juegos para móvil
+
+El plugin **Juegos para móvil** viene instalado. En el chat de un juego pide, por ejemplo,
+*"crea un juego de carreras para móvil"* o *"haz este juego jugable en el móvil"*. El agente:
+
+1. Escribe en el juego `src/touch-controls.js` (joystick táctil a la izquierda, mirar arrastrando a la derecha y botones), `manifest.webmanifest` (PWA), `docs/MOBILE.md` y `docs/build-android.ps1`.
+2. Conecta los controles táctiles a las mismas teclas que ya usa el juego y los dibuja en el HUD.
+3. Te explica cómo probarlo: en Chrome/Edge con F12 › vista de dispositivo, en el móvil como web/PWA, o como **APK de Android**:
+
+```powershell
+# 1) En Genex: menú del juego › Exportar juego… a una carpeta, p. ej. C:\Juegos\mi-juego-web
+# 2) Con Node.js y Android Studio instalados, dentro de la carpeta del juego:
+powershell -ExecutionPolicy Bypass -File docs\build-android.ps1 -Export "C:\Juegos\mi-juego-web"
+```
+
+iOS necesita un Mac con Xcode.
 
 ## Instalación en Windows
 
@@ -136,7 +155,7 @@ node --test tests/conformance/community.test.ts
 npm start
 ```
 
-Archivos propios del fork: `src/main/community.ts`, `src/substrate/engines/openai-compatible.ts`, `tests/conformance/community.test.ts`, `patches/`, `.github/workflows/build-windows.yml`, `NOTICE`. Los workflows originales están desactivados en `.github/upstream-workflows/`. El README original está en [README.upstream.md](README.upstream.md).
+Archivos propios del fork: `src/main/community.ts`, `src/renderer/i18n/` (español), `src/plugins/mobile/` (Juegos para móvil), `src/substrate/engines/openai-compatible.ts`, `tests/conformance/community.test.ts`, `patches/`, `.github/workflows/build-windows.yml`, `NOTICE`. Los workflows originales están desactivados en `.github/upstream-workflows/`. El README original está en [README.upstream.md](README.upstream.md).
 
 ## Créditos
 

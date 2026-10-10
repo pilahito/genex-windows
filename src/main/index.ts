@@ -616,7 +616,7 @@ async function createCore(userData: string): Promise<StudioCore> {
       void dialog.showMessageBox({
         type: "warning",
         title: COMMUNITY_PRODUCT_NAME,
-        message: "Sandbox desactivado / Sandbox disabled",
+        message: "Sandbox desactivado",
         detail: SANDBOX_OFF_WARNING,
       });
   }

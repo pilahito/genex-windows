@@ -106,3 +106,65 @@ describe("Windows sandbox grants", () => {
     assert.deepEqual(kept, [ssh]);
   });
 });
+
+describe("Juegos para móvil plugin", () => {
+  it("is a valid bundled package and prepares a game for phones", async () => {
+    const { inspectPackage } = await import("../../src/substrate/plugins/manifest.ts");
+    const { mkdir, readFile, writeFile } = await import("node:fs/promises");
+    const root = path.resolve("src/plugins/mobile");
+    const manifest = await inspectPackage(root);
+    assert.equal(manifest.id, "mobile");
+    assert.deepEqual(
+      manifest.tools.map((t) => t.name),
+      ["status", "prepare"],
+    );
+    const game = await tmpDir("mobile-game-");
+    await mkdir(path.join(game, "src"));
+    await mkdir(path.join(game, "docs"));
+    await writeFile(path.join(game, "index.html"), "<!doctype html><title>x</title>");
+    await writeFile(path.join(game, "src/main.js"), "// game\n");
+    const host = async (method: string, args: { path: string; text?: string }) => {
+      const file = path.join(game, args.path);
+      if (method === "project.read") return readFile(file, "utf8");
+      if (method === "project.write") {
+        await writeFile(file, args.text ?? "");
+        return { file: args.path };
+      }
+      throw new Error(method);
+    };
+    const backend = await import(path.join(root, "backend.mjs"));
+    const plugin = await backend.activate();
+    const ctx = { project: game, host };
+    const before = await plugin.tool("status", {}, ctx);
+    assert.equal(before.ready, false);
+    const result = await plugin.tool("prepare", { name: "Carrera Ñu", orientation: "portrait" }, ctx);
+    assert.deepEqual(result.written, [
+      "src/touch-controls.js",
+      "manifest.webmanifest",
+      "docs/MOBILE.md",
+      "docs/build-android.ps1",
+    ]);
+    const webManifest = JSON.parse(await readFile(path.join(game, "manifest.webmanifest"), "utf8"));
+    assert.equal(webManifest.name, "Carrera Ñu");
+    assert.equal(webManifest.orientation, "portrait");
+    assert.match(await readFile(path.join(game, "docs/build-android.ps1"), "utf8"), /com\.genexcommunity\.carreranu/);
+    assert.match(await readFile(path.join(game, "src/touch-controls.js"), "utf8"), /orientation: "portrait"/);
+    const again = await plugin.tool("prepare", { name: "Otro" }, ctx);
+    assert.equal(again.written.length, 0);
+    assert.equal(again.kept.length, 4);
+  });
+});
+
+describe("Spanish interface", () => {
+  it("translates whole labels and keeps surrounding spaces", async () => {
+    const { translateText } = await import("../../src/renderer/i18n/translate.ts");
+    assert.equal(translateText("New game"), "Nuevo juego");
+    assert.equal(translateText("Settings"), "Ajustes");
+    assert.equal(translateText("  New chat "), "  Nuevo chat ");
+    assert.equal(translateText(" Harness"), null);
+    assert.equal(translateText("Games"), "Juegos");
+    assert.equal(translateText("12 games"), "12 juegos");
+    assert.equal(translateText("3m ago"), "hace 3 min");
+    assert.equal(translateText("a sentence a model wrote"), null);
+  });
+});
