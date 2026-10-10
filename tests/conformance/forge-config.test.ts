@@ -19,15 +19,15 @@ test("the deb and rpm makers point at the packaged executable, not the npm packa
   for (const maker of linuxMakers) assert.equal(maker.config.options.bin, executable, maker.name);
 });
 
-test("Windows packages as a per-user Squirrel installer named Genex-Setup.exe, with Genex's own metadata and icon", () => {
+test("Windows packages as a per-user Squirrel installer named GenexWindowsCommunity-Setup.exe, with the fork's own metadata and icon", () => {
   const config = require("../../forge.config.cjs");
   const squirrel = config.makers.find((maker: { name: string }) => maker.name === "@electron-forge/maker-squirrel");
   assert.ok(squirrel, "a Squirrel maker is configured");
   assert.deepEqual(squirrel.platforms, ["win32"]);
-  assert.equal(squirrel.config.setupExe, "Genex-Setup.exe");
+  assert.equal(squirrel.config.setupExe, "GenexWindowsCommunity-Setup.exe");
   assert.equal(squirrel.config.name, config.packagerConfig.executableName, "the install folder and nupkg id");
   assert.match(squirrel.config.setupIcon, /icon\.ico$/);
   assert.equal(squirrel.config.noMsi, true);
   const { CompanyName, ProductName } = config.packagerConfig.win32metadata;
-  assert.deepEqual([CompanyName, ProductName], ["Genex", "Genex"]);
+  assert.deepEqual([CompanyName, ProductName], ["Genex Windows Community", "Genex Windows Community"]);
 });
