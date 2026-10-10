@@ -1,7 +1,7 @@
 {
   "name": "ai-game-studio",
   "productName": "Genex Windows Community",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "private": true,
   "license": "MIT",
   "description": "Genex Windows Community: unofficial Windows-friendly fork of Genex (AI game studio) with OpenAI-compatible local models (Jan, LM Studio, llama.cpp...)",
